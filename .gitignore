@@ -36,5 +36,5 @@ $tf*/
 packages/
 !Lib/**/*.dll
 *.scgdat
-*-log*.txt
+minerva-api-log*.txt
 Help/
