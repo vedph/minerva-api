@@ -28,6 +28,7 @@ public class StatsController(IIndexRepository repository) : ControllerBase
     [HttpGet()]
     [ProducesResponseType(StatusCodes.Status200OK,
         Type = typeof(IDictionary<string,double>))]
+    [ResponseCache(Duration = 3600)]
     public ActionResult<IDictionary<string,double>> GetStatistics()
     {
         return Ok(_repository.GetStatistics());

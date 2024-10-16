@@ -329,7 +329,7 @@ public static class Program
         ConfigureMessagingServices(services);
 
         // cache
-        // services.AddMemoryCache();
+        services.AddMemoryCache();
 
         // configuration
         services.AddSingleton(_ => config);
