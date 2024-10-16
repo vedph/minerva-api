@@ -17,10 +17,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Minerva.Services\Minerva.Services.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Fusi.DbManager.PgSql" Version="4.0.5" />
 		<PackageReference Include="MessagingApi" Version="4.0.0" />
 		<PackageReference Include="Polly" Version="8.4.2" />
