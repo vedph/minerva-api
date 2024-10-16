@@ -37,4 +37,5 @@ packages/
 !Lib/**/*.dll
 *.scgdat
 minerva-api-log*.txt
+log*.txt
 Help/
