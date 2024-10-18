@@ -150,17 +150,21 @@ public static class Program
     {
         // nope if Disabled
         var limit = config.GetSection("Limit");
-        if (limit.GetValue<bool>("IsDisabled", false)) return;
+        if (limit.GetValue("IsDisabled", false))
+        {
+            Log.Information("Rate limiter is disabled");
+            return;
+        }
 
         // PermitLimit (10)
-        int permit = limit.GetValue<int>("PermitLimit", 10);
+        int permit = limit.GetValue("PermitLimit", 10);
         if (permit < 1) permit = 10;
 
         // QueueLimit (0)
-        int queue = limit.GetValue<int>("QueueLimit", 0);
+        int queue = limit.GetValue("QueueLimit", 0);
 
-        // Window (00:01:00 = HH:MM:SS)
-        string? windowText = limit.GetValue<string>("Window");
+        // TimeWindow (00:01:00 = HH:MM:SS)
+        string? windowText = limit.GetValue<string>("TimeWindow");
         TimeSpan window;
         if (!string.IsNullOrEmpty(windowText))
         {
@@ -181,26 +185,31 @@ public static class Program
         // or hostname if not authenticated.
         services.AddRateLimiter(options =>
         {
-            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>
-            (httpContext =>
-                RateLimitPartition.GetFixedWindowLimiter(
-                    partitionKey: httpContext.User.Identity?.Name
-                        ?? httpContext.Request.Headers.Host.ToString(),
+            options.GlobalLimiter = PartitionedRateLimiter
+                .Create<HttpContext, string>(httpContext =>
+            {
+                string key = httpContext.User.Identity?.Name
+                    ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                    ?? "unknown";
+                Log.Information("Rate limit key: {Key}", key);
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: key,
                     factory: partition => new FixedWindowRateLimiterOptions
                     {
                         AutoReplenishment = true,
                         PermitLimit = permit,
                         QueueLimit = queue,
                         Window = window
-                    }));
+                    });
+            });
 
             options.OnRejected = async (context, token) =>
             {
+                Log.Warning("Rate limit exceeded");
+
                 // 429 too many requests
                 context.HttpContext.Response.StatusCode = 429;
-
-                // log
-                Log.Logger.Warning("Rate limit exceeded");
 
                 // send
                 await NotifyLimitExceededToRecipients(config, hostEnvironment);
@@ -401,6 +410,9 @@ public static class Program
 
             // CORS
             app.UseCors("CorsPolicy");
+
+            // rate limiter
+            app.UseRateLimiter();
 
             // HTTP request pipeline
             app.UseSwagger();
