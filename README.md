@@ -16,7 +16,7 @@ Note that these API are not protected by authentication. Anyway they rely on two
 - CORS, allowing only the web app to use the API.
 - rate limiting, which can be configured via `appsettings.json` and limits the requests per time-window. Parameters:
   - `IsDisabled`: if `true`, the rate limiting is disabled. Default is `false`.
-  - `PermitLimit`: the number of requests allowed in the time window. Default is 10.
+  - `PermitLimit`: the number of requests allowed in the time window. Default is 20.
   - `QueueLimit`: the number of requests that can be queued before the rate limit is enforced. Default is 0.
   - `TimeWindow`: the time window in format `HH:MM:SS`. Default is `00:01:00` (1 minute).
 
