@@ -20,6 +20,16 @@ Note that these API are not protected by authentication. Anyway they rely on two
   - `QueueLimit`: the number of requests that can be queued before the rate limit is enforced. Default is 0.
   - `TimeWindow`: the time window in format `HH:MM:SS`. Default is `00:01:00` (1 minute).
 
+To locally test messaging you can use [MailSlurper](https://github.com/mailslurper/mailslurper):
+
+```bash
+# Build container image (adjust repo location as necessary)
+docker build -t mailslurper 'https://github.com/mailslurper/mailslurper#master'
+
+# Run a temporary container. Note that upon shutdown, all stored messages will be lost when using this config.
+docker run -it --rm --name mailslurper -p 8080:8080 -p 8085:8085 -p 2500:2500 mailslurper
+```
+
 ## History
 
 - 2024-10-30: added test controllers.
