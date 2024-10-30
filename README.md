@@ -22,6 +22,8 @@ Note that these API are not protected by authentication. Anyway they rely on two
 
 ## History
 
+- 2024-10-30: added test controllers.
+
 ### 0.0.5
 
 - 2024-10-25: new Docker image.
