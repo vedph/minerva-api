@@ -89,6 +89,13 @@ instead of `"TextRetriever":{"Id":"text-retriever.file"}`.
 
 These changes make the database contents independent from their hosting environment, because no more references to the file system are required.
 
+If you want to quickly check structures like sentences, you can dump them like:
+
+```bash
+./pythia dump-spans -o c:/users/dfusi/desktop/spans-snt.csv -t snt -i 1
+./pythia dump-spans -o c:/users/dfusi/desktop/spans-tok.csv -t tok -i 1
+```
+
 ▶️ (7) build the **word index**:
 
 ```bash
