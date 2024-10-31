@@ -318,7 +318,7 @@ The `Filters` property lists the filters applied to the text extracted by the pa
     "RootXPath": "/tei:TEI/tei:text/tei:body",
     "StopTags": ["head"],
     "NoSentenceMarkerTags": ["abbr", "num"],
-    "SentenceEndMarkers": [".", "!", "?"],
+    "SentenceEndMarkers": ".!?",
     "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
   }
 }

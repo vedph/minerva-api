@@ -303,7 +303,7 @@
         "RootXPath": "/tei:TEI/tei:text/tei:body",
         "StopTags": ["head"],
         "NoSentenceMarkerTags": ["abbr", "num"],
-        "SentenceEndMarkers": [".", "!", "?"],
+        "SentenceEndMarkers": ".!?",
         "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
       }
     }
