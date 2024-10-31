@@ -26,7 +26,6 @@ Thumbs.db
 obj/
 .vs/
 [Rr]elease*/
-_ReSharper*/
 *.DotSettings
 [Tt]est[Rr]esult*
 *.vssscc
@@ -36,6 +35,3 @@ $tf*/
 packages/
 !Lib/**/*.dll
 *.scgdat
-minerva-api-log*.txt
-log*.txt
-Help/

@@ -32,6 +32,7 @@ docker run -it --rm --name mailslurper -p 8080:8080 -p 8085:8085 -p 2500:2500 ma
 
 ## History
 
+- 2024-10-31: better logging configuration.
 - 2024-10-30: added test controllers.
 
 ### 0.0.5

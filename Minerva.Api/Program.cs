@@ -31,9 +31,12 @@ namespace Minerva.Api;
 
 public static class Program
 {
+    // startup log file name, Serilog is configured later via appsettings.json
+    private const string STARTUP_LOG_NAME = "startup.log";
+
     private static void DumpEnvironmentVars()
     {
-        Console.WriteLine("ENVIRONMENT VARIABLES:");
+        Log.Information("ENVIRONMENT VARIABLES:");
         IDictionary dct = Environment.GetEnvironmentVariables();
         List<string> keys = [];
         var enumerator = dct.GetEnumerator();
@@ -43,7 +46,7 @@ public static class Program
         }
 
         foreach (string key in keys.Order())
-            Console.WriteLine($"{key} = {dct[key]}");
+            Log.Information("{Key} = {Value}", key, dct[key]);
     }
 
     #region Options
@@ -359,34 +362,22 @@ public static class Program
 
     private static void ConfigureLogger(WebApplicationBuilder builder)
     {
-        if (string.IsNullOrWhiteSpace(builder.Environment.WebRootPath))
-        {
-            string currentDirectory = Path.GetDirectoryName(
-                Assembly.GetExecutingAssembly().Location) ?? "";
-            builder.Environment.WebRootPath = Path.Combine(currentDirectory,
-                "wwwroot");
-        }
-
-        string logFilePath = Path.Combine(builder.Environment.WebRootPath,
-            "log.txt");
+        // https://github.com/serilog/serilog-settings-configuration
         builder.Host.UseSerilog((hostingContext, services, loggerConfiguration)
-            => loggerConfiguration
-            // .ReadFrom.Configuration(hostingContext.Configuration)
-            .Enrich.FromLogContext()
-            .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day),
-                writeToProviders: true);
+            => loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration));
     }
 
     public static async Task<int> Main(string[] args)
     {
+        // early startup logging to ensure we catch any exceptions
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .WriteTo.Console()
-        #if DEBUG
-            .WriteTo.File("minerva-api-log.txt", rollingInterval: RollingInterval.Day)
-        #endif
+#if DEBUG
+            .WriteTo.File(STARTUP_LOG_NAME, rollingInterval: RollingInterval.Day)
+#endif
             .CreateLogger();
 
         try
@@ -395,13 +386,13 @@ public static class Program
             DumpEnvironmentVars();
 
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-            IHostEnvironment hostEnvironment = builder.Environment;
+
+            ConfigureLogger(builder);
 
             IConfiguration config = new ConfigurationService(builder.Environment)
                 .Configuration;
 
-            ConfigureServices(builder.Services, config, hostEnvironment);
-            ConfigureLogger(builder);
+            ConfigureServices(builder.Services, config, builder.Environment);
 
             WebApplication app = builder.Build();
 
@@ -418,7 +409,6 @@ public static class Program
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            // app.UseAuthorization();
             app.MapControllers();
             await app.RunAsync();
 
