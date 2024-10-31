@@ -5,6 +5,9 @@ This documentation is about the backend part of the Pythia search engine used by
 ## Building Index
 
 - [indexing procedure](index/indexing.md)
+- [indexing pipeline](index/pipeline.md)
+- [partitioning documents](index/partitioning.md)
+- [database management](index/db.md)
 
 ## Hosting API
 

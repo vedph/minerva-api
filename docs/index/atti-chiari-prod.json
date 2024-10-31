@@ -9,21 +9,14 @@
     {
       "Id": "text-filter.xml-local-tag-list",
       "Options": {
-        "Names": [
-          "abbr",
-          "num"
-        ]
+        "Names": ["abbr", "num"]
       }
     },
     {
       "Id": "text-filter.xml-tag-filler",
       "Options": {
-        "Tags": [
-          "tei:expan"
-        ],
-        "Namespaces": [
-          "tei=http://www.tei-c.org/ns/1.0"
-        ]
+        "Tags": ["tei:expan"],
+        "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
       }
     },
     {
@@ -50,10 +43,7 @@
         "Model": "italian-isdt-ud-2.12-230717",
         "MaxChunkLength": 5000,
         "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)",
-        "BlackTags": [
-          "abbr",
-          "num"
-        ]
+        "BlackTags": ["abbr", "num"]
       }
     }
   ],
@@ -65,9 +55,7 @@
           "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title"
         ],
         "DefaultNsPrefix": "tei",
-        "Namespaces": [
-          "tei=http://www.tei-c.org/ns/1.0"
-        ]
+        "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
       }
     },
     {
@@ -160,7 +148,7 @@
               }
             ],
             "ValueTrimming": true,
-            "TokenTargetName": "address"
+            "TokenTargetName": "date"
           },
           {
             "Name": "email",
@@ -301,7 +289,7 @@
         ],
         "PrivilegedMappings": {
           "foreign": "language"
-        }  
+        }
       },
       "Filters": [
         {
@@ -313,16 +301,10 @@
       "Id": "structure-parser.xml-sentence",
       "Options": {
         "RootXPath": "/tei:TEI/tei:text/tei:body",
-        "StopTags": [
-          "head"
-        ],
-        "NoSentenceMarkerTags": [
-          "abbr",
-          "num"
-        ],
-        "Namespaces": [
-          "tei=http://www.tei-c.org/ns/1.0"
-        ]
+        "StopTags": ["head"],
+        "NoSentenceMarkerTags": ["abbr", "num"],
+        "SentenceEndMarkers": [".", "!", "?"],
+        "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
       }
     }
   ],
@@ -355,9 +337,7 @@
           "DiscardEmptyValue": true
         }
       ],
-      "Namespaces": [
-        "tei=http://www.tei-c.org/ns/1.0"
-      ],
+      "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"],
       "DefaultNsPrefix": "tei"
     }
   },
