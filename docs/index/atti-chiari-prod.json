@@ -1,0 +1,383 @@
+{
+  "SourceCollector": {
+    "Id": "source-collector.file",
+    "Options": {
+      "IsRecursive": false
+    }
+  },
+  "TextFilters": [
+    {
+      "Id": "text-filter.xml-local-tag-list",
+      "Options": {
+        "Names": [
+          "abbr",
+          "num"
+        ]
+      }
+    },
+    {
+      "Id": "text-filter.xml-tag-filler",
+      "Options": {
+        "Tags": [
+          "tei:expan"
+        ],
+        "Namespaces": [
+          "tei=http://www.tei-c.org/ns/1.0"
+        ]
+      }
+    },
+    {
+      "Id": "text-filter.tei"
+    },
+    {
+      "Id": "text-filter.replacer",
+      "Options": {
+        "Replacements": [
+          {
+            "Source": "\\bE’",
+            "IsPattern": true,
+            "Target": "È "
+          }
+        ]
+      }
+    },
+    {
+      "Id": "text-filter.quotation-mark"
+    },
+    {
+      "Id": "text-filter.udp",
+      "Options": {
+        "Model": "italian-isdt-ud-2.12-230717",
+        "MaxChunkLength": 5000,
+        "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)",
+        "BlackTags": [
+          "abbr",
+          "num"
+        ]
+      }
+    }
+  ],
+  "AttributeParsers": [
+    {
+      "Id": "attribute-parser.xml",
+      "Options": {
+        "Mappings": [
+          "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title"
+        ],
+        "DefaultNsPrefix": "tei",
+        "Namespaces": [
+          "tei=http://www.tei-c.org/ns/1.0"
+        ]
+      }
+    },
+    {
+      "Id": "attribute-parser.fs-csv",
+      "Options": {
+        "NameColumnIndex": 0,
+        "ValueColumnIndex": 1,
+        "ValueTrimming": true,
+        "SourceFind": "\\.xml$",
+        "SourceReplace": ".xml.meta"
+      }
+    }
+  ],
+  "DocSortKeyBuilder": {
+    "Id": "doc-sortkey-builder.standard"
+  },
+  "DocDateValueCalculator": {
+    "Id": "doc-datevalue-calculator.year",
+    "Options": {
+      "Attribute": "data",
+      "Pattern": "^(?<y>\\d{4})"
+    }
+  },
+  "Tokenizer": {
+    "Id": "tokenizer.standard",
+    "Options": {
+      "TokenFilters": [
+        {
+          "Id": "token-filter.punctuation",
+          "Options": {
+            "Punctuations": ".,;:!?",
+            "ListType": 1
+          }
+        },
+        {
+          "Id": "token-filter.udp",
+          "Options": {
+            "Props": 43,
+            "Language": ""
+          }
+        },
+        {
+          "Id": "token-filter.ita"
+        },
+        {
+          "Id": "token-filter.len-supplier",
+          "Options": {
+            "LetterOnly": true
+          }
+        }
+      ]
+    }
+  },
+  "StructureParsers": [
+    {
+      "Id": "structure-parser.xml",
+      "Options": {
+        "Definitions": [
+          {
+            "Name": "p",
+            "XPath": "/tei:TEI/tei:text/tei:body/tei:p",
+            "ValueTemplate": "{l}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "l",
+                "Value": "string-length(normalize-space(.))"
+              }
+            ]
+          },
+          {
+            "Name": "abbr",
+            "XPath": "//tei:abbr",
+            "ValueTemplate": "1",
+            "TokenTargetName": "abbr"
+          },
+          {
+            "Name": "address",
+            "XPath": "//tei:address",
+            "ValueTemplate": "1",
+            "TokenTargetName": "address"
+          },
+          {
+            "Name": "date",
+            "XPath": "//tei:date",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "address"
+          },
+          {
+            "Name": "email",
+            "XPath": "//tei:email",
+            "ValueTemplate": "1",
+            "TokenTargetName": "email"
+          },
+          {
+            "Name": "foreign",
+            "XPath": "//tei:foreign",
+            "ValueTemplate": "{l}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "l",
+                "Value": "./@xml:lang"
+              }
+            ],
+            "TokenTargetName": "foreign"
+          },
+          {
+            "Name": "fp-lat",
+            "XPath": "//tei:foreign[@xml:lang='lat']",
+            "ValueTemplate": "{txt}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "txt",
+                "Value": "./text()"
+              }
+            ],
+            "ValueTrimming": true
+          },
+          {
+            "Name": "hi-b",
+            "XPath": "//tei:hi[contains(@rend, 'b')]",
+            "ValueTemplate": "1",
+            "TokenTargetName": "b"
+          },
+          {
+            "Name": "hi-i",
+            "XPath": "//tei:hi[contains(@rend, 'i')]",
+            "ValueTemplate": "1",
+            "TokenTargetName": "i"
+          },
+          {
+            "Name": "hi-u",
+            "XPath": "//tei:hi[contains(@rend, 'u')]",
+            "ValueTemplate": "1",
+            "TokenTargetName": "u"
+          },
+          {
+            "Name": "num",
+            "XPath": "//tei:num",
+            "ValueTemplate": "1",
+            "TokenTargetName": "n"
+          },
+          {
+            "Name": "org-name",
+            "XPath": "//tei:orgName[@type='m']",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "org-m"
+          },
+          {
+            "Name": "org-name",
+            "XPath": "//tei:orgName[@type='f']",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "org-f"
+          },
+          {
+            "Name": "pers-name",
+            "XPath": "//tei:persName[@type='mn']",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "pn-m"
+          },
+          {
+            "Name": "pers-name",
+            "XPath": "//tei:persName[@type='fn']",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "pn-f"
+          },
+          {
+            "Name": "pers-name",
+            "XPath": "//tei:persName[@type='s']",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "pn-s"
+          },
+          {
+            "Name": "place-name",
+            "XPath": "//tei:placeName",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "tn"
+          }
+        ],
+        "Namespaces": [
+          "tei=http://www.tei-c.org/ns/1.0",
+          "xml=http://www.w3.org/XML/1998/namespace"
+        ],
+        "PrivilegedMappings": {
+          "foreign": "language"
+        }  
+      },
+      "Filters": [
+        {
+          "Id": "struct-filter.standard"
+        }
+      ]
+    },
+    {
+      "Id": "structure-parser.xml-sentence",
+      "Options": {
+        "RootXPath": "/tei:TEI/tei:text/tei:body",
+        "StopTags": [
+          "head"
+        ],
+        "NoSentenceMarkerTags": [
+          "abbr",
+          "num"
+        ],
+        "Namespaces": [
+          "tei=http://www.tei-c.org/ns/1.0"
+        ]
+      }
+    }
+  ],
+  "TextRetriever": {
+    "Id": "text-retriever.sql.pg"
+  },
+  "TextMapper": {
+    "Id": "text-mapper.xml",
+    "Options": {
+      "Definitions": [
+        {
+          "Name": "body",
+          "XPath": "/tei:TEI/tei:text/tei:body",
+          "ValueTemplate": "act"
+        },
+        {
+          "Name": "p",
+          "ParentName": "body",
+          "XPath": "./tei:p",
+          "DefaultValue": "paragraph",
+          "ValueTemplate": "{t}",
+          "ValueTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "."
+            }
+          ],
+          "ValueMaxLength": 60,
+          "ValueTrimming": true,
+          "DiscardEmptyValue": true
+        }
+      ],
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0"
+      ],
+      "DefaultNsPrefix": "tei"
+    }
+  },
+  "TextPicker": {
+    "Id": "text-picker.xml",
+    "Options": {
+      "HitOpen": "<hi rend=\"hit\">",
+      "HitClose": "</hi>",
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0",
+        "xml=http://www.w3.org/XML/1998/namespace"
+      ],
+      "DefaultNsPrefix": "tei"
+    }
+  },
+  "TextRenderer": {
+    "Id": "text-renderer.xslt",
+    "Options": {
+      "Script": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:tei=\"http://www.tei-c.org/ns/1.0\" version=\"1.0\"><xsl:output method=\"html\" omit-xml-declaration=\"yes\" /><xsl:template name=\"getPnType\"><xsl:param name=\"type\" /><xsl:choose><xsl:when test=\"$type = 'fn'\">female name</xsl:when><xsl:when test=\"$type = 'mn'\">male name</xsl:when><xsl:when test=\"$type = 's'\">surname</xsl:when></xsl:choose></xsl:template><xsl:template match=\"tei:teiHeader\"></xsl:template><xsl:template match=\"tei:p\"><p><xsl:if test=\"@rend\"><xsl:attribute name=\"class\">pa-<xsl:value-of select=\"@rend\" /></xsl:attribute></xsl:if><xsl:apply-templates /></p></xsl:template><xsl:template match=\"tei:choice[tei:expan]\"><span><xsl:attribute name=\"title\"><xsl:value-of select=\"tei:expan/text()\" /></xsl:attribute><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:abbr\"><span class=\"abbr\"><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:expan\"></xsl:template><xsl:template match=\"tei:address\"><span class=\"address\" title=\"address\"><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:date\"><span class=\"date\" title=\"date\"><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:email\"><span class=\"email\" title=\"email\"><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:foreign\"><span class=\"foreign\"><xsl:attribute name=\"title\"><xsl:value-of select=\"@xml:lang\" /></xsl:attribute><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:hi\"><span><xsl:choose><xsl:when test=\"@rend='hit'\"><xsl:attribute name=\"class\">hit</xsl:attribute></xsl:when><xsl:otherwise><xsl:attribute name=\"class\">hi-<xsl:value-of select=\"@rend\" /></xsl:attribute></xsl:otherwise></xsl:choose><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:num\"><span class=\"num\" title=\"number\"><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:orgName\"><span class=\"juridic-name\" title=\"juridic name\"><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:persName\"><span class=\"pers-name\"><xsl:attribute name=\"title\"><xsl:call-template name=\"getPnType\"><xsl:with-param name=\"type\" select=\"@type\" /></xsl:call-template></xsl:attribute><xsl:apply-templates /></span></xsl:template><xsl:template match=\"tei:placeName\"><span class=\"place-name\" title=\"place name\"><xsl:apply-templates /></span></xsl:template><xsl:template match=\"//tei:body[1]\"><xsl:text disable-output-escaping=\"yes\">&lt;!DOCTYPE html&gt;</xsl:text><html><head><meta charset=\"utf-8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" /><link rel=\"stylesheet\" href=\"read.css\" /></head><body><article class=\"rendition\"><xsl:apply-templates /></article></body></html></xsl:template></xsl:stylesheet>",
+      "ScriptRootElement": "{http://www.tei-c.org/ns/1.0}body"
+    }
+  }
+}

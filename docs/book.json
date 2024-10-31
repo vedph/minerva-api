@@ -1,0 +1,9 @@
+{
+  "root": "./",
+  "title": "Minerva API",
+  "description": "Backend technical documentation",
+  "author": "Daniele Fusi",
+  "structure": {
+    "summary": "SUMMARY.md"
+  }
+}

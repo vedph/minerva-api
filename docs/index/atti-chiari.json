@@ -1,0 +1,383 @@
+{
+  "SourceCollector": {
+    "Id": "source-collector.file",
+    "Options": {
+      "IsRecursive": false
+    }
+  },
+  "TextFilters": [
+    {
+      "Id": "text-filter.xml-local-tag-list",
+      "Options": {
+        "Names": [
+          "abbr",
+          "num"
+        ]
+      }
+    },
+    {
+      "Id": "text-filter.xml-tag-filler",
+      "Options": {
+        "Tags": [
+          "tei:expan"
+        ],
+        "Namespaces": [
+          "tei=http://www.tei-c.org/ns/1.0"
+        ]
+      }
+    },
+    {
+      "Id": "text-filter.tei"
+    },
+    {
+      "Id": "text-filter.replacer",
+      "Options": {
+        "Replacements": [
+          {
+            "Source": "\\bE’",
+            "IsPattern": true,
+            "Target": "È "
+          }
+        ]
+      }
+    },
+    {
+      "Id": "text-filter.quotation-mark"
+    },
+    {
+      "Id": "text-filter.udp",
+      "Options": {
+        "Model": "italian-isdt-ud-2.12-230717",
+        "MaxChunkLength": 5000,
+        "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)",
+        "BlackTags": [
+          "abbr",
+          "num"
+        ]
+      }
+    }
+  ],
+  "AttributeParsers": [
+    {
+      "Id": "attribute-parser.xml",
+      "Options": {
+        "Mappings": [
+          "title=/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title"
+        ],
+        "DefaultNsPrefix": "tei",
+        "Namespaces": [
+          "tei=http://www.tei-c.org/ns/1.0"
+        ]
+      }
+    },
+    {
+      "Id": "attribute-parser.fs-csv",
+      "Options": {
+        "NameColumnIndex": 0,
+        "ValueColumnIndex": 1,
+        "ValueTrimming": true,
+        "SourceFind": "\\.xml$",
+        "SourceReplace": ".xml.meta"
+      }
+    }
+  ],
+  "DocSortKeyBuilder": {
+    "Id": "doc-sortkey-builder.standard"
+  },
+  "DocDateValueCalculator": {
+    "Id": "doc-datevalue-calculator.year",
+    "Options": {
+      "Attribute": "data",
+      "Pattern": "^(?<y>\\d{4})"
+    }
+  },
+  "Tokenizer": {
+    "Id": "tokenizer.standard",
+    "Options": {
+      "TokenFilters": [
+        {
+          "Id": "token-filter.punctuation",
+          "Options": {
+            "Punctuations": ".,;:!?",
+            "ListType": 1
+          }
+        },
+        {
+          "Id": "token-filter.udp",
+          "Options": {
+            "Props": 43,
+            "Language": ""
+          }
+        },
+        {
+          "Id": "token-filter.ita"
+        },
+        {
+          "Id": "token-filter.len-supplier",
+          "Options": {
+            "LetterOnly": true
+          }
+        }
+      ]
+    }
+  },
+  "StructureParsers": [
+    {
+      "Id": "structure-parser.xml",
+      "Options": {
+        "Definitions": [
+          {
+            "Name": "p",
+            "XPath": "/tei:TEI/tei:text/tei:body/tei:p",
+            "ValueTemplate": "{l}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "l",
+                "Value": "string-length(normalize-space(.))"
+              }
+            ]
+          },
+          {
+            "Name": "abbr",
+            "XPath": "//tei:abbr",
+            "ValueTemplate": "1",
+            "TokenTargetName": "abbr"
+          },
+          {
+            "Name": "address",
+            "XPath": "//tei:address",
+            "ValueTemplate": "1",
+            "TokenTargetName": "address"
+          },
+          {
+            "Name": "date",
+            "XPath": "//tei:date",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "address"
+          },
+          {
+            "Name": "email",
+            "XPath": "//tei:email",
+            "ValueTemplate": "1",
+            "TokenTargetName": "email"
+          },
+          {
+            "Name": "foreign",
+            "XPath": "//tei:foreign",
+            "ValueTemplate": "{l}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "l",
+                "Value": "./@xml:lang"
+              }
+            ],
+            "TokenTargetName": "foreign"
+          },
+          {
+            "Name": "fp-lat",
+            "XPath": "//tei:foreign[@xml:lang='lat']",
+            "ValueTemplate": "{txt}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "txt",
+                "Value": "./text()"
+              }
+            ],
+            "ValueTrimming": true
+          },
+          {
+            "Name": "hi-b",
+            "XPath": "//tei:hi[contains(@rend, 'b')]",
+            "ValueTemplate": "1",
+            "TokenTargetName": "b"
+          },
+          {
+            "Name": "hi-i",
+            "XPath": "//tei:hi[contains(@rend, 'i')]",
+            "ValueTemplate": "1",
+            "TokenTargetName": "i"
+          },
+          {
+            "Name": "hi-u",
+            "XPath": "//tei:hi[contains(@rend, 'u')]",
+            "ValueTemplate": "1",
+            "TokenTargetName": "u"
+          },
+          {
+            "Name": "num",
+            "XPath": "//tei:num",
+            "ValueTemplate": "1",
+            "TokenTargetName": "n"
+          },
+          {
+            "Name": "org-name",
+            "XPath": "//tei:orgName[@type='m']",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "org-m"
+          },
+          {
+            "Name": "org-name",
+            "XPath": "//tei:orgName[@type='f']",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "org-f"
+          },
+          {
+            "Name": "pers-name",
+            "XPath": "//tei:persName[@type='mn']",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "pn-m"
+          },
+          {
+            "Name": "pers-name",
+            "XPath": "//tei:persName[@type='fn']",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "pn-f"
+          },
+          {
+            "Name": "pers-name",
+            "XPath": "//tei:persName[@type='s']",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "pn-s"
+          },
+          {
+            "Name": "place-name",
+            "XPath": "//tei:placeName",
+            "ValueTemplate": "{t}",
+            "ValueTemplateArgs": [
+              {
+                "Name": "t",
+                "Value": "."
+              }
+            ],
+            "ValueTrimming": true,
+            "TokenTargetName": "tn"
+          }
+        ],
+        "Namespaces": [
+          "tei=http://www.tei-c.org/ns/1.0",
+          "xml=http://www.w3.org/XML/1998/namespace"
+        ],
+        "PrivilegedMappings": {
+          "foreign": "language"
+        }  
+      },
+      "Filters": [
+        {
+          "Id": "struct-filter.standard"
+        }
+      ]
+    },
+    {
+      "Id": "structure-parser.xml-sentence",
+      "Options": {
+        "RootXPath": "/tei:TEI/tei:text/tei:body",
+        "StopTags": [
+          "head"
+        ],
+        "NoSentenceMarkerTags": [
+          "abbr",
+          "num"
+        ],
+        "Namespaces": [
+          "tei=http://www.tei-c.org/ns/1.0"
+        ]
+      }
+    }
+  ],
+  "TextRetriever": {
+    "Id": "text-retriever.file"
+  },
+  "TextMapper": {
+    "Id": "text-mapper.xml",
+    "Options": {
+      "Definitions": [
+        {
+          "Name": "body",
+          "XPath": "/tei:TEI/tei:text/tei:body",
+          "ValueTemplate": "act"
+        },
+        {
+          "Name": "p",
+          "ParentName": "body",
+          "XPath": "./tei:p",
+          "DefaultValue": "paragraph",
+          "ValueTemplate": "{t}",
+          "ValueTemplateArgs": [
+            {
+              "Name": "t",
+              "Value": "."
+            }
+          ],
+          "ValueMaxLength": 60,
+          "ValueTrimming": true,
+          "DiscardEmptyValue": true
+        }
+      ],
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0"
+      ],
+      "DefaultNsPrefix": "tei"
+    }
+  },
+  "TextPicker": {
+    "Id": "text-picker.xml",
+    "Options": {
+      "HitOpen": "<hi rend=\"hit\">",
+      "HitClose": "</hi>",
+      "Namespaces": [
+        "tei=http://www.tei-c.org/ns/1.0",
+        "xml=http://www.w3.org/XML/1998/namespace"
+      ],
+      "DefaultNsPrefix": "tei"
+    }
+  },
+  "TextRenderer": {
+    "Id": "text-renderer.xslt",
+    "Options": {
+      "Script": "c:\\users\\dfusi\\desktop\\ac\\read.xsl",
+      "ScriptRootElement": "{http://www.tei-c.org/ns/1.0}body"
+    }
+  }
+}
