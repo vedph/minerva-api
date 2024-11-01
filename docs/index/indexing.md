@@ -50,8 +50,10 @@ etc. This is the naming scheme resulting when you download files from their BLOB
 ▶️ (5) **index** documents from your folder (you can add `-p` to preflight):
 
 ```bash
-./pythia index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o
+./pythia index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o -x path -x gruppo-atto -x gruppo-nr
 ```
+
+>The option `-x` is used to exclude document attributes from indexing. Here we exclude `path` which is an editorial detail about the BLOB store. When not indexing for the public application remove `-x gruppo-atto -x gruppo-nr` as groups make sense when documents themselves are not split.
 
 ▶️ (6) adjust the **profile** for production, by replacing the text retriever ID and text renderer script in the database profile:
 
