@@ -4,6 +4,7 @@ This documentation is about the backend part of the Pythia search engine used by
 
 ## Index
 
+- [filtering documents](index/filtering.md)
 - [indexing procedure](index/indexing.md)
 - [indexing pipeline](index/pipeline.md)
 - [partitioning documents](index/partitioning.md)

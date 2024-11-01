@@ -1,0 +1,60 @@
+{
+  "Plugs": [
+    {
+      "Id": "text-filter-plug.string"
+    },
+    {
+      "Id": "text-filter-plug.string-builder"
+    }
+  ],
+  "Stepper": {
+    "Id": "stage-target-stepper.file"
+  },
+  "Stages": [
+    {
+      "Name": "by-line: dots & misc.",
+      "Reader": {
+        "Id": "piped-text-reader.file-line"
+      },
+      "Writer": {
+        "Id": "piped-text-writer.file"
+      },
+      "Filters": [
+        {
+          "Id": "text-filter.str.replacer",
+          "Options": {
+            "Replacements": [
+              {
+                "Source": "([0-9])\\.([0-9])",
+                "Target": "$1․$2",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
+                "Source": "\\b([0-9]+)\\.\\b",
+                "Target": "$1․",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
+                "Source": "\\b([a-zA-Z]+)\\.\\b",
+                "Target": "$1․",
+                "Repetitions": 1
+              },
+              {
+                "Source": "\\b(sic|SIC)!",
+                "Target": "$1¡",
+                "Repetitions": 1
+              },
+              {
+                "Source": "\\bE’",
+                "Target": "È ",
+                "Repetitions": 1
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
