@@ -11,17 +11,16 @@ For each replacement, there is:
 - the `Source` text or regular expresion to find.
 - the `Target` text to replace.
 - `IsPattern` is true when source is a regular expression.
-- `Repetitions` is 1, unless you have to cycle for multiple replacements (for corner cases where the output of the replacement might be the input for the same replacement).
+- (not applicable for XML scoped replacer) `Repetitions` is 1, unless you have to cycle for multiple replacements (for corner cases where the output of the replacement might be the input for the same replacement).
 
 ## Dots
 
 Dots pose many issues when they potentially interfere with sentence detection. Currently, these are the issues we are fixing here:
 
-- _dot between digits_, used as thousands separator (e.g. `1.234`). Not always these dots are inside a `num` element, which together with `abbr` is ignored for end-sentence punctuation. So, here we replace this dot with U+2024 (leading dot).
+- _dot between digits_, used as thousands separator or generic numbering (e.g. `1.234` or `1.2`). Not always these dots are inside a `num` element, which together with `abbr` is ignored for end-sentence punctuation. So, here we replace this dot with U+2024 (leading dot), but only when it is outside `abbr` and `num`.
 - _isolated digits ending with dots_ (e.g. `1. first item`), used in numbered lists. Replace this dot with U+2024 (leading dot).
-- _isolated letter ending with dots_ (e.g. `a. first item`), used in alphabetical lists. Replace this dot with U+2024 (leading dot).
-- _word sic followed by exclamation mark_ (e.g. `SIC!`), either uppercase or lowercase. Replace this dot with U+2024 (leading dot).
 
 ## Miscellaneous
 
+- _word sic followed by exclamation mark_ (e.g. `SIC!`), either uppercase or lowercase. Replace this dot with U+2024 (leading dot).
 - `E’` preceded by word boundary: replace with `È` + space.

@@ -12,7 +12,40 @@
   },
   "Stages": [
     {
-      "Name": "by-line: dots & misc.",
+      "Name": "by-line: dots",
+      "Reader": {
+        "Id": "piped-text-reader.file-line"
+      },
+      "Writer": {
+        "Id": "piped-text-writer.file"
+      },
+      "Filters": [
+        {
+          "Id": "text-filter.xml.scoped-replacer",
+          "Options": {
+            "ScopeTags": [
+              "tei:abbr",
+              "tei:num"
+            ],
+            "IsInverted": true,
+            "Replacements": [
+              {
+                "Source": "([0-9])\\.([0-9])",
+                "Target": "$1․$2",
+                "IsPattern": true
+              },
+              {
+                "Source": "\\b([0-9]+)\\.\\b",
+                "Target": "$1․",
+                "IsPattern": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Name": "by-line: misc.",
       "Reader": {
         "Id": "piped-text-reader.file-line"
       },
@@ -25,30 +58,20 @@
           "Options": {
             "Replacements": [
               {
-                "Source": "([0-9])\\.([0-9])",
-                "Target": "$1․$2",
-                "IsPattern": true,
-                "Repetitions": 1
-              },
-              {
-                "Source": "\\b([0-9]+)\\.\\b",
-                "Target": "$1․",
-                "IsPattern": true,
-                "Repetitions": 1
-              },
-              {
-                "Source": "\\b([a-zA-Z]+)\\.\\b",
-                "Target": "$1․",
-                "Repetitions": 1
-              },
-              {
                 "Source": "\\b(sic|SIC)!",
                 "Target": "$1¡",
+                "IsPattern": true,
                 "Repetitions": 1
               },
               {
                 "Source": "\\bE’",
                 "Target": "È ",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
+                "Source": "’",
+                "Target": "'",
                 "Repetitions": 1
               }
             ]
