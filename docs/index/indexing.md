@@ -101,8 +101,10 @@ If you want to quickly check structures like sentences, you can dump them like:
 ▶️ (7) build the **word index**:
 
 ```bash
-./pythia index-w -c date_value=3 -c nascita-avv=7 -x date -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s
+./pythia index-w -c date_value=3 -c nascita-avv=7 -x author -x data -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n abbr -n address -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s
 ```
+
+>Option `-x` excludes the specified document attribute. Option `-n` excludes the words having any of the specified attributes (to remove proper names). Option `-c` defines the count of classes for document attribute bins.
 
 ▶️ (8) optionally, **dump** the database into binary files:
 
