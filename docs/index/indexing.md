@@ -55,6 +55,8 @@ etc. This is the naming scheme resulting when you download files from their BLOB
 
 >The option `-x` is used to exclude document attributes from indexing. Here we exclude `path` which is an editorial detail about the BLOB store. When not indexing for the public application remove `-x gruppo-atto -x gruppo-nr` as groups make sense when documents themselves are not split.
 
+💡 To inspect the filtered text during indexing, you can add options `-r DUMP_DIR -u 1` or `-u 2`, where `1` means dumping and `2` dumping without indexing. This way you can see the plain text projected from the TEI document and superposable to it, which is used in all these processing types requiring no markup (like in NLP).
+
 ▶️ (6) adjust the **profile** for production, by replacing the text retriever ID and text renderer script in the database profile:
 
 ```bash

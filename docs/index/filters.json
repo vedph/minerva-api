@@ -12,9 +12,9 @@
   },
   "Stages": [
     {
-      "Name": "by-line: dots",
+      "Name": "by-file: dots1",
       "Reader": {
-        "Id": "piped-text-reader.file-line"
+        "Id": "piped-text-reader.file-content"
       },
       "Writer": {
         "Id": "piped-text-writer.file"
@@ -23,19 +23,41 @@
         {
           "Id": "text-filter.xml.scoped-replacer",
           "Options": {
-            "ScopeTags": [
-              "tei:abbr",
-              "tei:num"
-            ],
+            "ScopeTags": ["tei:abbr", "tei:num"],
             "IsInverted": true,
             "Replacements": [
               {
-                "Source": "([0-9])\\.([0-9])",
-                "Target": "$1․$2",
+                "Source": "\\.(\\d+)",
+                "Target": "․$1",
                 "IsPattern": true
               },
               {
-                "Source": "\\b([0-9]+)\\.\\b",
+                "Source": "(>\\s*\\d)\\.",
+                "Target": "$1․",
+                "IsPattern": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Name": "by-file: dots2",
+      "Reader": {
+        "Id": "piped-text-reader.file-content"
+      },
+      "Writer": {
+        "Id": "piped-text-writer.file"
+      },
+      "Filters": [
+        {
+          "Id": "text-filter.xml.scoped-replacer",
+          "Options": {
+            "ScopeTags": ["tei:abbr", "tei:num"],
+            "IsInverted": true,
+            "Replacements": [
+              {
+                "Source": "(․\\d+)\\.",
                 "Target": "$1․",
                 "IsPattern": true
               }
