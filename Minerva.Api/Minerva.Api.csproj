@@ -4,9 +4,15 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>0.0.5</Version>
-		<FileVersion>0.0.5</FileVersion>
-		<AssemblyVersion>0.0.5</AssemblyVersion>
+		<Authors>Daniele Fusi</Authors>
+		<Company>Fusi</Company>
+		<Product>Minerva API</Product>
+		<Description>Minerva API endpoints.</Description>
+		<Copyright>by Daniele Fusi 2021</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<Version>0.0.6</Version>
+		<FileVersion>0.0.6</FileVersion>
+		<AssemblyVersion>0.0.6</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

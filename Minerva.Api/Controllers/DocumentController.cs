@@ -51,6 +51,7 @@ public sealed class DocumentController(ICorpusRepository repository) :
         return DoGetDocument(id, content);
     }
 
+    /*
     /// <summary>
     /// Adds or updates the specified document.
     /// </summary>
@@ -75,4 +76,5 @@ public sealed class DocumentController(ICorpusRepository repository) :
     {
         await DoDeleteDocumentAsync(id);
     }
+    */
 }

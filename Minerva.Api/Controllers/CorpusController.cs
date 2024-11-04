@@ -1,4 +1,5 @@
-﻿using Corpus.Api.Controllers;
+﻿/*
+using Corpus.Api.Controllers;
 using Corpus.Api.Models;
 using Corpus.Core;
 using Fusi.Tools.Data;
@@ -112,3 +113,4 @@ public sealed class CorpusController(ICorpusRepository repository)
         await DoDeleteCorpusAsync(id);
     }
 }
+*/
