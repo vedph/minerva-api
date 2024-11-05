@@ -44,7 +44,7 @@ Test endpoints are:
 
 ## Messaging
 
-Messaging can be optionally enabled to allow administrators get notifications from the app.
+Messaging can be optionally enabled to allow administrators get notifications from the app. Currently this requires access to an SMTP server (the code anyway is modular, and there you can easily swap the SMTP module with another one based on a different service).
 
 These settings refer to the message content:
 

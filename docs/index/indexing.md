@@ -8,6 +8,8 @@ This page contains the procedure for creating the Minerva index from the pseudon
 - you have a running PostgreSQL service.
 - you have Pythia binary files in some folder. The procedure below assumes that you open a terminal window located in that folder.
 
+>⚠️ In most cases, you will need to prepare the received TEI documents with some systematic [filtering](filtering.md) to remove slight imperfections from the original sources.
+
 ## Procedure
 
 >This procedure refers to a Windows environment. Just change the folder names to adapt it to other environments. Also, you can freely change any folder name; the folders used here are just suggested for commodity.
