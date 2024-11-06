@@ -80,6 +80,18 @@
           "Options": {
             "Replacements": [
               {
+                "Source": "\\s+\\)",
+                "Target": ")",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
+                "Source": "\\(\\s+",
+                "Target": "(",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
                 "Source": "!)",
                 "Target": "¡)"
               },

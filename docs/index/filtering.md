@@ -27,6 +27,8 @@ Dots pose issues when they potentially interfere with sentence detection. Curren
 
 ## Miscellaneous
 
+- `(` + spaces: remove spaces.
+- spaces + `)`: remove spaces.
 - exclamation mark + closing bracket (e.g. `(SIC!)`): replace `!` with `¡`.
 - question mark + closing bracket (e.g. `(davvero?)`): replace `?` with `¿`.
 - `AEIOU` + `’`: replace with the corresponding accented uppercase letter.
