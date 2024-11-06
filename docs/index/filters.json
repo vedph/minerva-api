@@ -101,33 +101,23 @@
               },
               {
                 "Source": "A’",
-                "Target": "À",
-                "IsPattern": true,
-                "Repetitions": 1
+                "Target": "À"
               },
               {
                 "Source": "E’",
-                "Target": "È",
-                "IsPattern": true,
-                "Repetitions": 1
+                "Target": "È"
               },
               {
                 "Source": "I’",
-                "Target": "Ì",
-                "IsPattern": true,
-                "Repetitions": 1
+                "Target": "Ì"
               },
               {
                 "Source": "O’",
-                "Target": "Ò",
-                "IsPattern": true,
-                "Repetitions": 1
+                "Target": "Ò"
               },
               {
                 "Source": "U’",
-                "Target": "Ù",
-                "IsPattern": true,
-                "Repetitions": 1
+                "Target": "Ù"
               },
               {
                 "Source": "’",
