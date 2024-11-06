@@ -228,11 +228,13 @@ We use here a standard tokenizer (`tokenizer.standard`) which splits text at whi
 {
   "Id": "token-filter.punctuation",
   "Options": {
-  "Punctuations": ".,;:!?",
+  "Punctuations": ".,;:!¡?¿",
   "ListType": 1
   }
 },
 ```
+
+>Note that `¡¿` are added to deal with `!?` which have been filtered into their inverted counterparts to avoid them being considered by the sentence detector algorithm.
 
 - `token-filter.udp`: this filter consumes the [UDPipe]((https://lindat.mff.cuni.cz/services/udpipe/)) analysis results collected by `text-filter-udp` and maps them to the tokens defined by the Pythia's pipeline's tokenizer; for each matched token it adds it a selection of its POS tags as attributes. The `language` property set to an empty string means that such attributes should be added only to tokens having a null (non-specified) language. In this corpus in fact we use data derived from TEI `foreign` to mark tokens as non-Italian, assuming that any unmarked token is Italian. So, the effect of this setting is allowing UDP-derived attributes only for Italian tokens, leaving out all the tokens marked for another language.
 

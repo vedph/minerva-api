@@ -86,7 +86,7 @@
         {
           "Id": "token-filter.punctuation",
           "Options": {
-            "Punctuations": ".,;:!?",
+            "Punctuations": ".,;:!¡?¿",
             "ListType": 1
           }
         },

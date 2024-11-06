@@ -80,14 +80,40 @@
           "Options": {
             "Replacements": [
               {
-                "Source": "\\b(sic|SIC)!",
-                "Target": "$1¡",
+                "Source": "!)",
+                "Target": "¡)"
+              },
+              {
+                "Source": "?)",
+                "Target": "¿)"
+              },
+              {
+                "Source": "A’",
+                "Target": "À",
                 "IsPattern": true,
                 "Repetitions": 1
               },
               {
-                "Source": "\\bE’",
-                "Target": "È ",
+                "Source": "E’",
+                "Target": "È",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
+                "Source": "I’",
+                "Target": "Ì",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
+                "Source": "O’",
+                "Target": "Ò",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
+                "Source": "U’",
+                "Target": "Ù",
                 "IsPattern": true,
                 "Repetitions": 1
               },

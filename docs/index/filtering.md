@@ -27,8 +27,9 @@ Dots pose issues when they potentially interfere with sentence detection. Curren
 
 ## Miscellaneous
 
-- _word sic followed by exclamation mark_ (e.g. `SIC!`), either uppercase or lowercase. Replace this dot with U+2024 (leading dot).
-- `E’` preceded by word boundary: replace with `È` + space.
+- exclamation mark + closing bracket (e.g. `(SIC!)`): replace `!` with `¡`.
+- question mark + closing bracket (e.g. `(davvero?)`): replace `?` with `¿`.
+- `AEIOU` + `’`: replace with the corresponding accented uppercase letter.
 - `’` with `'`: smart quotes seem to be limited to cases of apostrophes only, so it is a required semantic adjustment for Unicode.
 
 ## Procedure

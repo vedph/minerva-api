@@ -152,7 +152,7 @@ public static class Program
         IConfiguration config, IHostEnvironment hostEnvironment)
     {
         // nope if Disabled
-        var limit = config.GetSection("Limit");
+        IConfigurationSection limit = config.GetSection("RateLimit");
         if (limit.GetValue("IsDisabled", false))
         {
             Log.Information("Rate limiter is disabled");
