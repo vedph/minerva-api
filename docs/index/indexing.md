@@ -112,7 +112,7 @@ If you want to quickly check structures like sentences, you can dump them like:
 pg_dump --username=postgres -f c:/users/dfusi/desktop/pythia-nowords.sql pythia
 ```
 
-Should you want to _restore_ this database and start over from n.7, remove the `pythia` database, re-create it (`./pythia create-db -c`), and then restore:
+Should you want to _restore_ this database and start over from n.7, remove the `pythia` database, re-create it as a new empty database, and then restore:
 
 ```bash
 psql -U postgres -d pythia -f c:/users/dfusi/desktop/pythia-nowords.sql
