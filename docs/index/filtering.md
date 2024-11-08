@@ -27,9 +27,16 @@ Dots pose issues when they potentially interfere with sentence detection. Curren
 
 ## Miscellaneous
 
+- only outside `abbr`/`num`:
+  - any of `.,;:?!` (when not preceded by `xml`, because we have `xml:lang` attributes) + no whitespace/digit/`<`: insert space (e.g. `articolo ,con`). Note that this does not cover stitched text like `resistente;2) in subordine` as numbers do use `,` and `.`.
+  - whitespaces + any of `.,;:?!` + whitespaces: remove left whitespaces.
+
+- replace code A0 with space (e.g. `il` + U+00A0 + `custode`).
+- whitespaces + `%`: remove whitespaces (e.g. `del 75 % a carico`).
 - letter + `(`: insert space between them.
 - `(` + spaces: remove spaces.
 - spaces + `)`: remove spaces.
+- `ﬃ` and other ligatures replaced with their counterpart like `ffi` (e.g. `consolidata dell'Uﬃcio Edilizia`).
 - exclamation mark + closing bracket (e.g. `(SIC!)`): replace `!` with `¡`.
 - question mark + closing bracket (e.g. `(davvero?)`): replace `?` with `¿`.
 - `AEIOU` + `’`: replace with the corresponding accented uppercase letter.
@@ -45,4 +52,8 @@ Dots pose issues when they potentially interfere with sentence detection. Curren
 ./proteus filter c:/users/dfusi/desktop/ac/*.xml c:/users/dfusi/desktop/ac/filters.json c:/users/dfusi/desktop/ac/filtered -x xml
 ```
 
-There will be an output file for each stage, the final output having extension `.xml`. You can then use any diffing tool to compare the filtered results with the originals.
+>There will be an output file for each stage, the final output having extension `.xml`. You can then use any diffing tool to compare the filtered results with the originals.
+
+▶️ (3) rename the last step of each filtering result using some tool. In this case we just replace `_00003.xml$` with `.xml`. At this stage, you may want to diff the originals with the filtering results to check for issues.
+
+When everything is OK, just replace the XML files to be indexed with the filtered files.

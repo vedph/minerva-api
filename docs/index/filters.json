@@ -23,7 +23,8 @@
         {
           "Id": "text-filter.xml.scoped-replacer",
           "Options": {
-            "ScopeTags": ["tei:abbr", "tei:num"],
+            "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"],
+            "ScopeTags": ["tei:abbr", "tei:num", "tei:email"],
             "IsInverted": true,
             "Replacements": [
               {
@@ -53,13 +54,32 @@
         {
           "Id": "text-filter.xml.scoped-replacer",
           "Options": {
-            "ScopeTags": ["tei:abbr", "tei:num"],
+            "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"],
+            "ScopeTags": ["tei:abbr", "tei:num", "tei:email"],
             "IsInverted": true,
             "Replacements": [
               {
                 "Source": "(․\\d+)\\.",
                 "Target": "$1․",
                 "IsPattern": true
+              },
+              {
+                "Source": "(?<!xml)([.,;:?!])([^\\s\\d<])",
+                "Target": "$1 $2",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
+                "Source": "\\s+([.,;:?!]\\s+)",
+                "Target": "$1",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
+                "Source": "</TEI>\\s+",
+                "Target": "</TEI>",
+                "IsPattern": true,
+                "Repetitions": 1
               }
             ]
           }
@@ -80,6 +100,16 @@
           "Options": {
             "Replacements": [
               {
+                "Source": " ",
+                "Target": " "
+              },
+              {
+                "Source": "\\s+%",
+                "Target": "%",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
                 "Source": "\\s+\\)",
                 "Target": ")",
                 "IsPattern": true,
@@ -96,6 +126,54 @@
                 "Target": "$1 (",
                 "IsPattern": true,
                 "Repetitions": 1
+              },
+              {
+                "Source": "Æ",
+                "Target": "AE"
+              },
+              {
+                "Source": "æ",
+                "Target": "ae"
+              },
+              {
+                "Source": "Œ",
+                "Target": "OE"
+              },
+              {
+                "Source": "œ",
+                "Target": "oe"
+              },
+              {
+                "Source": "ɶ",
+                "Target": "OE"
+              },
+              {
+                "Source": "ﬀ",
+                "Target": "ff"
+              },
+              {
+                "Source": "ﬁ",
+                "Target": "fi"
+              },
+              {
+                "Source": "ﬂ",
+                "Target": "fl"
+              },
+              {
+                "Source": "ﬃ",
+                "Target": "ffi"
+              },
+              {
+                "Source": "ﬄ",
+                "Target": "ffl"
+              },
+              {
+                "Source": "ﬅ",
+                "Target": "st"
+              },
+              {
+                "Source": "ﬆ",
+                "Target": "st"
               },
               {
                 "Source": "!)",

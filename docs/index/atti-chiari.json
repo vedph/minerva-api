@@ -9,7 +9,7 @@
     {
       "Id": "text-filter.xml-local-tag-list",
       "Options": {
-        "Names": ["abbr", "num"]
+        "Names": ["abbr", "num", "email"]
       }
     },
     {
@@ -23,18 +23,6 @@
       "Id": "text-filter.tei"
     },
     {
-      "Id": "text-filter.replacer",
-      "Options": {
-        "Replacements": [
-          {
-            "Source": "\\bE’",
-            "IsPattern": true,
-            "Target": "È "
-          }
-        ]
-      }
-    },
-    {
       "Id": "text-filter.quotation-mark"
     },
     {
@@ -43,7 +31,7 @@
         "Model": "italian-isdt-ud-2.12-230717",
         "MaxChunkLength": 5000,
         "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)",
-        "BlackTags": ["abbr", "num"]
+        "BlackTags": ["abbr", "num", "email"]
       }
     }
   ],
@@ -302,7 +290,7 @@
       "Options": {
         "RootXPath": "/tei:TEI/tei:text/tei:body",
         "StopTags": ["head"],
-        "NoSentenceMarkerTags": ["abbr", "num"],
+        "NoSentenceMarkerTags": ["abbr", "num", "email"],
         "SentenceEndMarkers": ".!?",
         "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
       }

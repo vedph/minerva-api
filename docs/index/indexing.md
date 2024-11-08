@@ -57,7 +57,11 @@ etc. This is the naming scheme resulting when you download files from their BLOB
 
 >The option `-x` is used to exclude document attributes from indexing. Here we exclude `path` which is an editorial detail about the BLOB store. When not indexing for the public application remove `-x gruppo-atto -x gruppo-nr` as groups make sense when documents themselves are not split.
 
-💡 To inspect the filtered text during indexing, you can add options `-r DUMP_DIR -u 1` or `-u 2`, where `1` means dumping and `2` dumping without indexing. This way you can see the plain text projected from the TEI document and superposable to it, which is used in all these processing types requiring no markup (like in NLP).
+💡 To **inspect** the filtered text during indexing, you can add options `-r DUMP_DIR -u 1` or `-u 2`, where `1` means dumping and `2` dumping without indexing. This way you can see the plain text projected from the TEI document and superposable to it, which is used in all these processing types requiring no markup (like in NLP), e.g.:
+
+```bash
+./pythia index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o -x path -x gruppo-atto -x gruppo-nr -r c:/users/dfusi/desktop/ac/dump/ -u 1
+```
 
 ▶️ (6) adjust the **profile** for production, by replacing the text retriever ID and text renderer script in the database profile:
 
@@ -102,16 +106,40 @@ If you want to quickly check structures like sentences, you can dump them like:
 ./pythia dump-spans -o c:/users/dfusi/desktop/spans-tok.csv -t tok -i 1
 ```
 
+>💡 At this time it can be a good idea to **backup** the database, so you can just rebuild the word index when required:
+
+```bash
+pg_dump --username=postgres -f c:/users/dfusi/desktop/pythia-nowords.sql pythia
+```
+
+Should you want to _restore_ this database and start over from n.7, remove the `pythia` database, re-create it (`./pythia create-db -c`), and then restore:
+
+```bash
+psql -U postgres -d pythia -f c:/users/dfusi/desktop/pythia-nowords.sql
+```
+
 ▶️ (7) build the **word index**:
 
 ```bash
-./pythia index-w -c date_value=3 -c nascita-avv=7 -x author -x data -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n abbr -n address -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s
+./pythia index-w -c ^date_value=3 -c ^nascita-avv=7 -x author -x data -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n abbr -n address -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s
 ```
 
->Option `-x` excludes the specified document attribute. Option `-n` excludes the words having any of the specified attributes (to remove proper names). Option `-c` defines the count of classes for document attribute bins.
+>Option `-x` excludes the specified document attribute. Option `-n` excludes the words having any of the specified attributes (to remove proper names). Option `-c` defines the count of classes for document attribute bins. The `^` prefix before `date_value` means that we want integer only bins for that attribute, as it represents just a year value.
 
 ▶️ (8) optionally, **dump** the database into binary files:
 
 ```bash
 ./pythia bulk-write c:/users/dfusi/desktop/ac/bulk
+```
+
+You can also backup the resulting database:
+
+```bash
+pg_dump --username=postgres -f c:/users/dfusi/desktop/pythia.sql pythia
+```
+
+Should you need to, you can dump spans from the database like (here `-t`=span type and `-i`=document ID):
+
+```bash
+./pythia dump-spans -o c:/users/dfusi/desktop/spans.csv -t snt -i 1
 ```

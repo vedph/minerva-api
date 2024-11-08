@@ -72,16 +72,13 @@ In our case, the source for documents is just the file system, assuming that we 
 
 These filters preprocess the source texts before indexing. Filters are applied in the order they are specified:
 
-- `text-filter.xml-local-tag-list` (for UDPipe): used to extract a list of XML tags, one for each of the tags found in the source text, and listed in the filter's options. For each tag found it stores its name and position. Such data will be used later by other components in the pipeline. In this case, these are the UDPipe components, which must ignore any text inside TEI tags like `abbr` or `num`. This avoids garbage text derived from annotations creeping into the main text flow, thus providing a correct text to the UDPipe service.
+- `text-filter.xml-local-tag-list` (for UDPipe): used to extract a list of XML tags, one for each of the tags found in the source text, and listed in the filter's options. For each tag found it stores its name and position. Such data will be used later by other components in the pipeline. In this case, these are the UDPipe components, which must ignore any text inside TEI tags like `abbr`, `num`, `email`. This avoids garbage text derived from annotations creeping into the main text flow, thus providing a correct text to the UDPipe service.
 
 ```json
 {
   "Id": "text-filter.xml-local-tag-list",
   "Options": {
-    "Names": [
-      "abbr",
-      "num"
-    ]
+    "Names": ["abbr", "num", "email"]
   }
 },
 ```
@@ -110,23 +107,6 @@ These filters preprocess the source texts before indexing. Filters are applied i
 },
 ```
 
-- `text-filter.replacer` is used to apply a minor adjustment to source texts by means of string or pattern replacements. In this case, the only adjustment is replacing `E’` (preceded by word boundary) to `È`. This is required because in some cases the documents authors have misused this quote as an accent marker, and failing to mark it properly would have negative effects on POS tagging (e.g. `è` being a verb, and `e` a conjunction).
-
-```json
-{
-  "Id": "text-filter.replacer",
-  "Options": {
-  "Replacements": [
-      {
-        "Source": "\\bE’",
-        "IsPattern": true,
-        "Target": "È "
-      }
-    ]
-  }
-},
-```
-
 - `text-filter.quotation-mark` is used to ensure that apostrophes are handled correctly, by replacing "smart quotes" with an apostrophe character proper.
 
 ```json
@@ -135,7 +115,7 @@ These filters preprocess the source texts before indexing. Filters are applied i
 },
 ```
 
-- `text-filter-udp` is used to submit the whole text (as filtered by the preceding filters) to the [UDPipe service](https://lindat.mff.cuni.cz/services/udpipe/) for POS tagging. The options specify the model used for the Italian language, the blacklisted tags to exclude from tagging (`abbr` and `num` as collected by the first filter above), and the text chunks sizes and tail detection expression. The filter does not effectively changes the received text, but just collects the POS tagger results to be consumed later at the token level. We require to do this at the text level, as POS tagging works on whole sentences; but we will consume the results later, so that we can add metadata to each single token as we detect and filter them.
+- `text-filter-udp` is used to submit the whole text (as filtered by the preceding filters) to the [UDPipe service](https://lindat.mff.cuni.cz/services/udpipe/) for POS tagging. The options specify the model used for the Italian language, the blacklisted tags to exclude from tagging (`abbr`, `num`, `email`, as collected by the first filter above), and the text chunks sizes and tail detection expression. The filter does not effectively changes the received text, but just collects the POS tagger results to be consumed later at the token level. We require to do this at the text level, as POS tagging works on whole sentences; but we will consume the results later, so that we can add metadata to each single token as we detect and filter them.
 
 ```json
 {
@@ -144,10 +124,7 @@ These filters preprocess the source texts before indexing. Filters are applied i
     "Model": "italian-isdt-ud-2.12-230717",
     "MaxChunkLength": 5000,
     "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)",
-    "BlackTags": [
-      "abbr",
-      "num"
-    ]
+    "BlackTags": ["abbr", "num", "email"]
   }
 }
 ```
