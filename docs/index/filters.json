@@ -92,6 +92,12 @@
                 "Repetitions": 1
               },
               {
+                "Source": "(\\p{L})\\(",
+                "Target": "$1 (",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
+              {
                 "Source": "!)",
                 "Target": "¡)"
               },

@@ -27,6 +27,7 @@ Dots pose issues when they potentially interfere with sentence detection. Curren
 
 ## Miscellaneous
 
+- letter + `(`: insert space between them.
 - `(` + spaces: remove spaces.
 - spaces + `)`: remove spaces.
 - exclamation mark + closing bracket (e.g. `(SIC!)`): replace `!` with `¡`.
