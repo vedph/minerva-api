@@ -32,8 +32,9 @@ Dots pose issues when they potentially interfere with sentence detection. Curren
   - whitespaces + any of `.,;:?!` + whitespaces: remove left whitespaces.
 
 - replace code A0 with space (e.g. `il` + U+00A0 + `custode`).
+- replace `(...)` and `[...]` with their counterparts with the Unicode ellipsis character instead of 3 dots.
+- remove whitespace(s) in `“` + whitespaces or  whitespace(s) + `”`.
 - whitespaces + `%`: remove whitespaces (e.g. `del 75 % a carico`).
-- letter + `(`: insert space between them.
 - `(` + spaces: remove spaces.
 - spaces + `)`: remove spaces.
 - `ﬃ` and other ligatures replaced with their counterpart like `ffi` (e.g. `consolidata dell'Uﬃcio Edilizia`).
@@ -41,6 +42,23 @@ Dots pose issues when they potentially interfere with sentence detection. Curren
 - question mark + closing bracket (e.g. `(davvero?)`): replace `?` with `¿`.
 - `AEIOU` + `’`: replace with the corresponding accented uppercase letter.
 - `’` with `'`: smart quotes seem to be limited to cases of apostrophes only, so it is a required semantic adjustment for Unicode.
+
+## Dropped
+
+The following filters were dropped because they might break other texts:
+
+- letter + `(`: insert space between them:
+
+```json
+{
+  "Source": "(\\p{L})\\(",
+  "Target": "$1 (",
+  "IsPattern": true,
+  "Repetitions": 1
+},
+```
+
+This can't be used to fix typos because there are texts like: "impone(va)", "è(ra)", "resta(va)no", etc.
 
 ## Procedure
 
