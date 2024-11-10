@@ -23,7 +23,7 @@ Dots pose issues when they potentially interfere with sentence detection. Curren
   - dot + digit(s). This targets cases like "1.2" in numbering or "12.345" in a thousands separator outside `num` (by human mistake).
   - replace `>` + optional whitespaces + digit + dot. This target numbering which usually is immediately after some hilight or other markup. In general, a sequence like "1." could not be determined as a numbering rather than a mere number followed by a stop like in "ex art. 23."; but here we target a single digit preceded by a tag, with only whitespaces between them, which in most cases seems to be a pattern for numbering.
 
-- **stage 2** ("by-file: dots2"): this replaces the final dot in U+2024 + digit(s) + dot into U+2024, thus ensuring that a sequence in a numbering has no dot left (e.g. the last dot in "1.3.").
+- **stage 2** ("by-file: dots2"): this replaces the final dot in U+2024 + digit(s) + dot into U+2024, thus ensuring that a sequence in a numbering has no dot left (e.g. the last dot in "1.3."). Also, a currency symbol (`$£€`) followed by dot + whitespace(s) + digit replaces the dot with U+2024.
 
 ## Miscellaneous
 

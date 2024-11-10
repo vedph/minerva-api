@@ -288,9 +288,9 @@
     {
       "Id": "structure-parser.xml-sentence",
       "Options": {
-        "RootXPath": "/tei:TEI/tei:text/tei:body",
-        "StopTags": ["head"],
-        "NoSentenceMarkerTags": ["abbr", "num", "email"],
+        "BlankTags": ["tei:teiHeader", "tei:expan"],
+        "StopTags": ["tei:head"],
+        "NoSentenceMarkerTags": ["tei:abbr", "tei:num", "tei:email"],
         "SentenceEndMarkers": ".!?",
         "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
       }

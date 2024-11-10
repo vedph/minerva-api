@@ -80,6 +80,12 @@
                 "Target": "</TEI>",
                 "IsPattern": true,
                 "Repetitions": 1
+              },
+              {
+                "Source": "([$£€])\\.(\\s*)(\\d)",
+                "Target": "$1․$2$3",
+                "IsPattern": true,
+                "Repetitions": 1
               }
             ]
           }
@@ -89,7 +95,7 @@
     {
       "Name": "by-line: misc.",
       "Reader": {
-        "Id": "piped-text-reader.file-line"
+        "Id": "piped-text-reader.file-content"
       },
       "Writer": {
         "Id": "piped-text-writer.file"
