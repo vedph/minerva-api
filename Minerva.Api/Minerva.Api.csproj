@@ -10,9 +10,9 @@
 		<Description>Minerva API endpoints.</Description>
 		<Copyright>by Daniele Fusi 2021</Copyright>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<Version>0.0.7</Version>
-		<FileVersion>0.0.7</FileVersion>
-		<AssemblyVersion>0.0.7</AssemblyVersion>
+		<Version>0.0.8</Version>
+		<FileVersion>0.0.8</FileVersion>
+		<AssemblyVersion>0.0.8</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
