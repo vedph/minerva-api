@@ -9,7 +9,7 @@
     {
       "Id": "text-filter.xml-local-tag-list",
       "Options": {
-        "Names": ["abbr", "num", "email"]
+        "Names": ["abbr", "num", "email", "date"]
       }
     },
     {
@@ -31,7 +31,7 @@
         "Model": "italian-isdt-ud-2.12-230717",
         "MaxChunkLength": 5000,
         "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)",
-        "BlackTags": ["abbr", "num", "email"]
+        "BlackTags": ["abbr", "num", "email", "date"]
       }
     }
   ],
@@ -117,7 +117,24 @@
             "Name": "abbr",
             "XPath": "//tei:abbr",
             "ValueTemplate": "1",
-            "TokenTargetName": "abbr"
+            "TokenTargetName": "abbr",
+            "OverriddenPos": "ABBR",
+            "RemovedPosTags": [
+              "clitic",
+              "definite",
+              "degree",
+              "deprel",
+              "gender",
+              "lemma",
+              "mood",
+              "number",
+              "numtype",
+              "person",
+              "poss",
+              "prontype",
+              "tense",
+              "verbform"
+            ]
           },
           {
             "Name": "address",
@@ -136,13 +153,47 @@
               }
             ],
             "ValueTrimming": true,
-            "TokenTargetName": "date"
+            "TokenTargetName": "date",
+            "OverriddenPos": "DATE",
+            "RemovedPosTags": [
+              "clitic",
+              "definite",
+              "degree",
+              "deprel",
+              "gender",
+              "lemma",
+              "mood",
+              "number",
+              "numtype",
+              "person",
+              "poss",
+              "prontype",
+              "tense",
+              "verbform"
+            ]
           },
           {
             "Name": "email",
             "XPath": "//tei:email",
             "ValueTemplate": "1",
-            "TokenTargetName": "email"
+            "TokenTargetName": "email",
+            "OverriddenPos": "EMAIL",
+            "RemovedPosTags": [
+              "clitic",
+              "definite",
+              "degree",
+              "deprel",
+              "gender",
+              "lemma",
+              "mood",
+              "number",
+              "numtype",
+              "person",
+              "poss",
+              "prontype",
+              "tense",
+              "verbform"
+            ]
           },
           {
             "Name": "foreign",
@@ -154,7 +205,24 @@
                 "Value": "./@xml:lang"
               }
             ],
-            "TokenTargetName": "foreign"
+            "TokenTargetName": "foreign",
+            "OverriddenPos": "X",
+            "RemovedPosTags": [
+              "clitic",
+              "definite",
+              "degree",
+              "deprel",
+              "gender",
+              "lemma",
+              "mood",
+              "number",
+              "numtype",
+              "person",
+              "poss",
+              "prontype",
+              "tense",
+              "verbform"
+            ]
           },
           {
             "Name": "fp-lat",

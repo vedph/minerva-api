@@ -70,15 +70,15 @@ In our case, the source for documents is just the file system, assuming that we 
 
 ### 2. Text Filters
 
-These filters preprocess the source texts before indexing. Filters are applied in the order they are specified:
+These filters preprocess the source texts before indexing and are valid for the token-based filtering portion of the pipeline. When parsing structures, you start from the original XML because full annotations might be required. Filters are applied in the order they are specified:
 
-- `text-filter.xml-local-tag-list` (for UDPipe): used to extract a list of XML tags, one for each of the tags found in the source text, and listed in the filter's options. For each tag found it stores its name and position. Such data will be used later by other components in the pipeline. In this case, these are the UDPipe components, which must ignore any text inside TEI tags like `abbr`, `num`, `email`. This avoids garbage text derived from annotations creeping into the main text flow, thus providing a correct text to the UDPipe service.
+- `text-filter.xml-local-tag-list` (for UDPipe): used to extract a list of XML tags, one for each of the tags found in the source text, and listed in the filter's options. For each tag found it stores its name and position. Such data will be used later by other components in the pipeline. In this case, these are the UDPipe components, which must ignore any text inside TEI tags like `abbr`, `num`, `email`, `date` (TEI `date` in these documents always includes a date like `DD/MM/YYYY`). This avoids garbage text derived from annotations creeping into the main text flow, thus providing a correct text to the UDPipe service.
 
 ```json
 {
   "Id": "text-filter.xml-local-tag-list",
   "Options": {
-    "Names": ["abbr", "num", "email"]
+    "Names": ["abbr", "num", "email", "date"]
   }
 },
 ```
@@ -89,12 +89,8 @@ These filters preprocess the source texts before indexing. Filters are applied i
 {
   "Id": "text-filter.xml-tag-filler",
   "Options": {
-    "Tags": [
-      "tei:expan"
-    ],
-    "Namespaces": [
-      "tei=http://www.tei-c.org/ns/1.0"
-    ]
+    "Tags": [ "tei:expan" ],
+    "Namespaces": [ "tei=http://www.tei-c.org/ns/1.0" ]
   }
 },
 ```
@@ -115,7 +111,7 @@ These filters preprocess the source texts before indexing. Filters are applied i
 },
 ```
 
-- `text-filter-udp` is used to submit the whole text (as filtered by the preceding filters) to the [UDPipe service](https://lindat.mff.cuni.cz/services/udpipe/) for POS tagging. The options specify the model used for the Italian language, the blacklisted tags to exclude from tagging (`abbr`, `num`, `email`, as collected by the first filter above), and the text chunks sizes and tail detection expression. The filter does not effectively changes the received text, but just collects the POS tagger results to be consumed later at the token level. We require to do this at the text level, as POS tagging works on whole sentences; but we will consume the results later, so that we can add metadata to each single token as we detect and filter them.
+- `text-filter-udp` is used to submit the whole text (as filtered by the preceding filters) to the [UDPipe service](https://lindat.mff.cuni.cz/services/udpipe/) for POS tagging. The options specify the model used for the Italian language, the blacklisted tags to exclude from tagging (`abbr`, `num`, `email`, `date` as collected by the first filter above), and the text chunks sizes and tail detection expression. The filter does not effectively changes the received text, but just collects the POS tagger results to be consumed later at the token level. We require to do this at the text level, as POS tagging works on whole sentences; but we will consume the results later, so that we can add metadata to each single token as we detect and filter them.
 
 ```json
 {
@@ -124,7 +120,7 @@ These filters preprocess the source texts before indexing. Filters are applied i
     "Model": "italian-isdt-ud-2.12-230717",
     "MaxChunkLength": 5000,
     "ChunkTailPattern": "(?<![0-9])[.?!](?=\\s|$)",
-    "BlackTags": ["abbr", "num", "email"]
+    "BlackTags": ["abbr", "num", "email", "date"]
   }
 }
 ```
@@ -267,11 +263,11 @@ Structures:
 
 Ghost structures produce these token attributes:
 
-- `abbr`=`1`
+- `abbr`=`1`. Note that this also overrides the token's POS to `ABBR` and removes any other POS-dependent attributes from it.
 - `address`=`1`
-- `date`=(trimmed date text)
+- `date`=(trimmed date text). Note that this also overrides the token's POS to `DATE` and removes any other POS-dependent attributes from it.
 - `email`=`1`
-- `foreign`=(language)
+- `foreign`=(language). Note that this also overrides the token's POS to `X` and removes any other POS-dependent attributes from it.
 - `b`=`1` for bold
 - `i`=`1` for italic
 - `u`=`1` for underline
@@ -288,20 +284,22 @@ The `PrivilegedMappings` property lists the token attributes which target a priv
 
 The `Filters` property lists the filters applied to the text extracted by the parser as the value. Here we just use a standard structure filter. This removes any character different from letter or digit or apostrophe or whitespace, any diacritics from each letter, and lowercases each letter. Whitespaces are all normalized to a single space, and the result is trimmed.
 
-- `structure-parser.xml-sentence`: a sentence parser. This relies on punctuation (and some XML tags) to determine the extent of sentences in the document. The parser has as its root XML element the TEI `body` element. To detect sentence boundaries it simply relies on a combination of punctuation characters plus XML elements. The punctuation characters used as end sentence markers are defined by `SentenceEndMarkers` (stop mark, exclamation mark, question mark); the XML closing tags which count as sentence end markers are listed by `StopTags` (here just `head`, representing a title). Additionally, any sentence end marker punctuation found in XML elements `abbr` and `num` is discarded. This is because abbreviations or numbers might include dots, which would be misleading for sentence end detection.
+- `structure-parser.xml-sentence`: a sentence parser. This relies on punctuation (and some XML tags) to determine the extent of sentences in the document. The parser ignores the tags `tei:teiHeader` and `tei:expan` (the property name means that these elements are blank-filled) to avoid their text creep into the body text flow. To detect sentence boundaries it simply relies on a combination of punctuation characters plus XML elements. The punctuation characters used as end sentence markers are defined by `SentenceEndMarkers` (stop mark, exclamation mark, question mark); the XML closing tags which count as sentence end markers are listed by `StopTags` (here just `tei:head`, representing a title). Additionally, any sentence end marker punctuation found in XML elements `tei:abbr`, `tei:num` and `tei:email` is discarded. This is because abbreviations, numbers and email addresses might include dots, which would be misleading for sentence end detection.
 
 ```json
 {
   "Id": "structure-parser.xml-sentence",
   "Options": {
-    "RootXPath": "/tei:TEI/tei:text/tei:body",
-    "StopTags": ["head"],
-    "NoSentenceMarkerTags": ["abbr", "num"],
+    "BlankTags": ["tei:teiHeader", "tei:expan"],
+    "StopTags": ["tei:head"],
+    "NoSentenceMarkerTags": ["tei:abbr", "tei:num", "tei:email"],
     "SentenceEndMarkers": ".!?",
     "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"]
   }
 }
 ```
+
+>Note that here we are blank-filling the TEI header besides all the `expan` elements, because as already noticed the filters applied at the start of the pipeline do not apply at this stage.
 
 #### About Phrases
 

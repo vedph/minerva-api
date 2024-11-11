@@ -60,6 +60,12 @@ The following filters were dropped because they might break other texts:
 
 This can't be used to fix typos because there are texts like: "impone(va)", "è(ra)", "resta(va)no", etc.
 
+## Checks
+
+Things to check which cannot be fixed automatically in a robust way:
+
+- spaced words, like "P E R" for "PER". To see whether there are any left, look for a regular expression like `\b[A-Z] [A-Z]`.
+
 ## Procedure
 
 ▶️ (1) place the [filters.json](filters.json) file in some folder.
