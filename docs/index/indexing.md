@@ -121,10 +121,10 @@ psql -U postgres -d pythia -f c:/users/dfusi/desktop/pythia-nowords.sql
 ▶️ (7) build the **word index**:
 
 ```bash
-./pythia index-w -c ^date_value=3 -c ^nascita-avv=7 -x author -x data -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n abbr -n address -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s
+./pythia index-w -c ^date_value=3 -c ^nascita-avv=7 -x author -x data -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n abbr -n address -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s -p ABBR -p DATE -p EMAIL -p NUM -p PROPN -p SYM -p X
 ```
 
->Option `-x` excludes the specified document attribute. Option `-n` excludes the words having any of the specified attributes (to remove proper names). Option `-c` defines the count of classes for document attribute bins. The `^` prefix before `date_value` means that we want integer only bins for that attribute, as it represents just a year value.
+>Option `-x` excludes the specified document attribute. Option `-n` excludes the words having any of the specified attributes (to remove proper names). Option `-c` defines the count of classes for document attribute bins. The `^` prefix before `date_value` means that we want integer only bins for that attribute, as it represents just a year value. Option `-p` excludes the specified POS from the index.
 
 ▶️ (8) optionally, **dump** the database into binary files:
 

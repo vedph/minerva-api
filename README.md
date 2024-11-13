@@ -32,6 +32,10 @@ docker run -it --rm --name mailslurper -p 8080:8080 -p 8085:8085 -p 2500:2500 ma
 
 ## History
 
+### 1.0.0
+
+- 2024-11-13: ⚠️ upgraded to .NET 9.
+
 ### 0.0.8
 
 - 2024-11-10: updated packages.
