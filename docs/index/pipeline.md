@@ -421,8 +421,9 @@ As the default namespace in these TEI documents is the TEI namespace, we must no
 "TextPicker": {
   "Id": "text-picker.xml",
   "Options": {
-    "HitOpen": "<hi rend=\"hit\">",
-    "HitClose": "</hi>",
+    "HitElement": "<tei:hi rend=\"hit\"></tei:hi>",
+    "WrapperPrefix": "<div>",
+    "WrapperSuffix": "</div>",
     "Namespaces": [
       "tei=http://www.tei-c.org/ns/1.0",
       "xml=http://www.w3.org/XML/1998/namespace"
@@ -431,6 +432,8 @@ As the default namespace in these TEI documents is the TEI namespace, we must no
   }
 },
 ```
+
+>The `HitElement` property defines the XML element to use for wrapping highlighted text in its rendition. Properties `WrapperPrefix` and `WrapperSuffix` are used to define the opening and closing tags of the mock element used to provide a root for the XML portion extracted from the source document, when the context spans across several map nodes. Using their common ancestor node would not be a good idea, because it corresponds to the body, and thus would grab the whole text as the context. Rather, we extract the extent of text from the start and end nodes of the map, wrapped in a mock container element.
 
 ### 11. Text Renderer
 

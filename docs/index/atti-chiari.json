@@ -400,8 +400,9 @@
   "TextPicker": {
     "Id": "text-picker.xml",
     "Options": {
-      "HitOpen": "<hi rend=\"hit\">",
-      "HitClose": "</hi>",
+      "HitElement": "<tei:hi rend=\"hit\"></tei:hi>",
+      "WrapperPrefix": "<div>",
+      "WrapperSuffix": "</div>",
       "Namespaces": [
         "tei=http://www.tei-c.org/ns/1.0",
         "xml=http://www.w3.org/XML/1998/namespace"
