@@ -15,21 +15,31 @@ So, without further details, we can just focus on the replacements themselves, w
 
 A Proteus-based filtering is structured into stages; each stage applies any number and type of filtering, and ends up into a new output file. Stages accumulate their changes, until the last output file, which is the end result. This allows users check each stage output.
 
-## Dots
+## Filters
 
-Dots pose issues when they potentially interfere with sentence detection. Currently, these are the issues we are fixing here:
+This describes each filter in [filters.json](filters.json), in their order.
 
-- **stage 1** ("by-file: dots1"): only outside `abbr` and `num` elements, replace the targeted dot with U+2024 in:
-  - dot + digit(s). This targets cases like "1.2" in numbering or "12.345" in a thousands separator outside `num` (by human mistake).
-  - replace `>` + optional whitespaces + digit + dot. This target numbering which usually is immediately after some hilight or other markup. In general, a sequence like "1." could not be determined as a numbering rather than a mere number followed by a stop like in "ex art. 23."; but here we target a single digit preceded by a tag, with only whitespaces between them, which in most cases seems to be a pattern for numbering.
+### Stage dots1
 
-- **stage 2** ("by-file: dots2"): this replaces the final dot in U+2024 + digit(s) + dot into U+2024, thus ensuring that a sequence in a numbering has no dot left (e.g. the last dot in "1.3."). Also, a currency symbol (`$£€`) followed by dot + whitespace(s) + digit replaces the dot with U+2024.
+XML scoped replacer by file:
 
-## Miscellaneous
+- outside TEI `abbr`, `num`, `email`, `date`:
+  - replace dot with U+2024 in "dot + digit(s)". This targets cases like "1.2" in numbering or "12.345" in a thousands separator or a date like "20.12.2024". This happens because often numbers or dates were not explicitly marked as such.
+  - dot with U+2024 in "`>` + optional whitespaces + digit + dot". This target numbering which usually is immediately after some hilight or other markup. In general, a sequence like "1." could not be determined as a numbering rather than a mere number followed by a stop like in "ex art. 23."; but here we target a single digit preceded by a tag, with only whitespaces between them, which in most cases seems to be a pattern for numbering.
 
-- only outside `abbr`/`num`:
-  - any of `.,;:?!` (when not preceded by `xml`, because we have `xml:lang` attributes) + no whitespace/digit/`<`: insert space (e.g. `articolo ,con`). Note that this does not cover stitched text like `resistente;2) in subordine` as numbers do use `,` and `.`.
-  - whitespaces + any of `.,;:?!` + whitespaces: remove left whitespaces.
+### Stage dots2
+
+XML scoped replacer by file:
+
+- replace dot with U+2024 in "U+2024 + digit(s) + dot". This ensures that a sequence in a numbering has no dot left (e.g. the last dot in "1.3.").
+- insert space before the last character in "punctuation + non-(WS/digit/`<`)" not preceded by `<xml`.
+- trim "WS + pucntuation + WS".
+- trim end of `</TEI>`.
+- replace dot with U+2024 in "currency symbol (`$£€`) + dot + whitespace(s) + digit".
+
+## Stage misc
+
+String replacer, by line:
 
 - replace code A0 with space (e.g. `il` + U+00A0 + `custode`).
 - replace `(...)` and `[...]` with their counterparts with the Unicode ellipsis character instead of 3 dots.
@@ -42,6 +52,82 @@ Dots pose issues when they potentially interfere with sentence detection. Curren
 - question mark + closing bracket (e.g. `(davvero?)`): replace `?` with `¿`.
 - `AEIOU` + `’`: replace with the corresponding accented uppercase letter.
 - `’` with `'`: smart quotes seem to be limited to cases of apostrophes only, so it is a required semantic adjustment for Unicode.
+
+## Example
+
+This example text sums up the above replacements:
+
+(1) original:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>civ-ge-app-cit342-200911_01</title>
+      </titleStmt>
+      <publicationStmt>
+        <p>Not published.</p>
+      </publicationStmt>
+      <sourceDesc>
+        <p>Undisclosed.</p>
+      </sourceDesc>
+    </fileDesc>
+  </teiHeader>
+  <text>
+    <body>
+      <p rend="c"><choice><abbr>ecc.ma</abbr><expan xml:lang="ita">eccellentissima</expan></choice> CORTE DI APPELLO DI <placeName>GUARDIAGRELE</placeName>.</p>
+      <p>Il signor Ammazzalamorte al 20.12.2024 deve 32.000 euro ai parenti della medesima . Motivi:</p>
+      <p>1. uno;</p>
+      <p>1.1. uno punto uno.</p>
+      <p>Una virgola,senza spazio. O anche ,così.</p>
+      <p>Una virgola fra spazi , perché no?</p>
+      <p>Ancora: €.123 o $. 123 perché qualcuno confonde i simboli di valuta con le abbreviazioni!</p>.
+      <p>Qui uso U+00A0 anziché spazio fra lettere: A B.</p>
+      <p>Simboli vari: (...) e [...] e virgolette “ con spazi ” e 45 % con spazio e parentesi ( con spazi )!</p>
+      <p>Poi legature tipo Æ=AE ed esclamativi o interrogativi in parentesi: (wow!) (davvero?).</p>
+      <p>Infine lettere con apice singolo a mo' di accento. E’ vero? Gli apici singoli superstiti diventano apostrofi: "l’uomo".</p>
+    </body>
+  </text>
+</TEI>
+```
+
+(2) filtered (I replace U+2024 with `@` for readability):
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>civ-ge-app-cit342-200911_01</title>
+      </titleStmt>
+      <publicationStmt>
+        <p>Not published.</p>
+      </publicationStmt>
+      <sourceDesc>
+        <p>Undisclosed.</p>
+      </sourceDesc>
+    </fileDesc>
+  </teiHeader>
+  <text>
+    <body>
+      <p rend="c"><choice><abbr>ecc.ma</abbr><expan xml:lang="ita">eccellentissima</expan></choice> CORTE DI APPELLO DI <placeName>GUARDIAGRELE</placeName>.</p>
+      <p>Il signor Ammazzalamorte al 20@12@2024 deve 32@000 euro ai parenti della medesima. Motivi:</p>
+      <p>1@ uno;</p>
+      <p>1@1@ uno punto uno.</p>
+      <p>Una virgola, senza spazio. O anche , così.</p>
+      <p>Una virgola fra spazi, perché no?</p>
+      <p>Ancora: €@123 o $@ 123 perché qualcuno confonde i simboli di valuta con le abbreviazioni!</p>.
+      <p>Qui uso U+00A0 anziché spazio fra lettere: A B.</p>
+      <p>Simboli vari: (. ..) e [. .. ] e virgolette “con spazi” e 45% con spazio e parentesi (con spazi)!</p>
+      <p>Poi legature tipo AE=AE ed esclamativi o interrogativi in parentesi: (wow¡) (davvero¿).</p>
+      <p>Infine lettere con apice singolo a mo' di accento. È vero? Gli apici singoli superstiti diventano apostrofi: "l'uomo".</p>
+    </body>
+  </text>
+</TEI>
+```
 
 ## Dropped
 

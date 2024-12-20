@@ -24,7 +24,7 @@
           "Id": "text-filter.xml.scoped-replacer",
           "Options": {
             "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"],
-            "ScopeTags": ["tei:abbr", "tei:num", "tei:email"],
+            "ScopeTags": ["tei:abbr", "tei:num", "tei:email", "tei:date"],
             "IsInverted": true,
             "Replacements": [
               {
@@ -55,7 +55,7 @@
           "Id": "text-filter.xml.scoped-replacer",
           "Options": {
             "Namespaces": ["tei=http://www.tei-c.org/ns/1.0"],
-            "ScopeTags": ["tei:abbr", "tei:num", "tei:email"],
+            "ScopeTags": ["tei:abbr", "tei:num", "tei:email", "tei:date"],
             "IsInverted": true,
             "Replacements": [
               {
