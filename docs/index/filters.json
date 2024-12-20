@@ -70,12 +70,6 @@
                 "Repetitions": 1
               },
               {
-                "Source": "\\s+([.,;:?!]\\s+)",
-                "Target": "$1",
-                "IsPattern": true,
-                "Repetitions": 1
-              },
-              {
                 "Source": "</TEI>\\s+",
                 "Target": "</TEI>",
                 "IsPattern": true,
@@ -105,6 +99,12 @@
           "Id": "text-filter.str.replacer",
           "Options": {
             "Replacements": [
+              {
+                "Source": "\\s+([.,;:?!]\\s+)",
+                "Target": "$1",
+                "IsPattern": true,
+                "Repetitions": 1
+              },
               {
                 "Source": " ",
                 "Target": " "

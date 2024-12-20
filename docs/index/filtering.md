@@ -32,8 +32,7 @@ XML scoped replacer by file:
 XML scoped replacer by file:
 
 - **replace dot** with U+2024 in "U+2024 + digit(s) + dot". This ensures that a sequence in a numbering has no dot left (e.g. the last dot in "1.3.").
-- **insert space** before the last character in "punctuation + non-(WS/digit/`<`)" not preceded by `<xml`.
-- **trim left** of "WS + punctuation + WS".
+- **insert space** before the last character in "punctuation + non-(WS/digit)".
 - **trim right** of `</TEI>`.
 - **replace dot** with U+2024 in "currency symbol (`$£€`) + dot + whitespace(s) + digit".
 
@@ -41,6 +40,7 @@ XML scoped replacer by file:
 
 String replacer, by line:
 
+- **trim left** of "WS + punctuation + WS".
 - **replace U+00A0** with space (e.g. `il` + U+00A0 + `custode`).
 - **replace ellipses** `(...)` and `[...]` with their counterparts with the Unicode ellipsis character instead of 3 dots.
 - **remove whitespace(s)** in `“` + whitespaces or  whitespace(s) + `”`.
@@ -117,11 +117,11 @@ This example text sums up the above replacements:
       <p>Il signor Ammazzalamorte al 20@12@2024 deve 32@000 euro ai parenti della medesima. Motivi:</p>
       <p>1@ uno;</p>
       <p>1@1@ uno punto uno.</p>
-      <p>Una virgola, senza spazio. O anche , così.</p>
+      <p>Una virgola, senza spazio. O anche, così.</p>
       <p>Una virgola fra spazi, perché no?</p>
       <p>Ancora: €@123 o $@ 123 perché qualcuno confonde i simboli di valuta con le abbreviazioni!</p>.
       <p>Qui uso U+00A0 anziché spazio fra lettere: A B.</p>
-      <p>Simboli vari: (. ..) e [. .. ] e virgolette “con spazi” e 45% con spazio e parentesi (con spazi)!</p>
+      <p>Simboli vari: (…) e […] e virgolette “con spazi” e 45% con spazio e parentesi (con spazi)!</p>
       <p>Poi legature tipo AE=AE ed esclamativi o interrogativi in parentesi: (wow¡) (davvero¿).</p>
       <p>Infine lettere con apice singolo a mo' di accento. È vero? Gli apici singoli superstiti diventano apostrofi: "l'uomo".</p>
     </body>
