@@ -16,19 +16,20 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Corpus.Api.Controllers" Version="10.0.4" />
+		<PackageReference Include="Corpus.Api.Controllers" Version="10.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
 		<PackageReference Include="Pythia.Api.Models" Version="5.0.5" />
 		<PackageReference Include="Pythia.Api.Services" Version="5.0.5" />
-		<PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+		<PackageReference Include="Scalar.AspNetCore" Version="1.2.66" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Fusi.DbManager.PgSql" Version="5.0.1" />
 		<PackageReference Include="MessagingApi" Version="5.0.0" />
 		<PackageReference Include="Polly" Version="8.5.0" />
-		<PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
-		<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 	</ItemGroup>

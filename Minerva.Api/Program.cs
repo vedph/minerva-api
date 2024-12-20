@@ -26,6 +26,7 @@ using Corpus.Core;
 using Corpus.Sql;
 using Pythia.Core;
 using Pythia.Sql.PgSql;
+using Scalar.AspNetCore;
 
 namespace Minerva.Api;
 
@@ -238,32 +239,6 @@ public static class Program
     }
     #endregion
 
-    #region Swagger
-    private static void ConfigureSwaggerServices(IServiceCollection services)
-    {
-        // Swagger/OpenAPI (https://aka.ms/aspnetcore/swashbuckle)
-        services.AddEndpointsApiExplorer();
-
-        services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Version = "v1",
-                Title = "API",
-                Description = "Minerva Services"
-            });
-            c.DescribeAllParametersInCamelCase();
-
-            // include XML comments
-            // (remember to check the build XML comments in the prj props)
-            string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            if (File.Exists(xmlPath))
-                c.IncludeXmlComments(xmlPath);
-        });
-    }
-    #endregion
-
     #region Messaging
     private static void ConfigureMessagingServices(IServiceCollection services)
     {
@@ -356,8 +331,8 @@ public static class Program
             return factory.CreateLogger("Logger");
         });
 
-        // Swagger
-        ConfigureSwaggerServices(services);
+        // Open API
+        services.AddOpenApi();
     }
 
     private static void ConfigureLogger(WebApplicationBuilder builder)
@@ -406,10 +381,11 @@ public static class Program
             app.UseRateLimiter();
 
             // HTTP request pipeline
-            app.UseSwagger();
-            app.UseSwaggerUI();
-
             app.MapControllers();
+            app.MapOpenApi();
+            app.MapScalarApiReference(options =>
+                options.WithTitle("Minerva API"));
+
             await app.RunAsync();
 
             return 0;

@@ -32,6 +32,9 @@ docker run -it --rm --name mailslurper -p 8080:8080 -p 8085:8085 -p 2500:2500 ma
 
 ## History
 
+- 2024-12-20:
+  - replaced Swagger with Scalar. 
+  - updated packages.
 - 2024-11-22: updated packages.
 
 ### 1.0.0
