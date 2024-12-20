@@ -64,7 +64,7 @@
                 "IsPattern": true
               },
               {
-                "Source": "(?<!xml)([.,;:?!])([^\\s\\d<])",
+                "Source": "([.,;:?!])([^])\\s\\d\\.])",
                 "Target": "$1 $2",
                 "IsPattern": true,
                 "Repetitions": 1

@@ -24,34 +24,34 @@ This describes each filter in [filters.json](filters.json), in their order.
 XML scoped replacer by file:
 
 - outside TEI `abbr`, `num`, `email`, `date`:
-  - replace dot with U+2024 in "dot + digit(s)". This targets cases like "1.2" in numbering or "12.345" in a thousands separator or a date like "20.12.2024". This happens because often numbers or dates were not explicitly marked as such.
-  - dot with U+2024 in "`>` + optional whitespaces + digit + dot". This target numbering which usually is immediately after some hilight or other markup. In general, a sequence like "1." could not be determined as a numbering rather than a mere number followed by a stop like in "ex art. 23."; but here we target a single digit preceded by a tag, with only whitespaces between them, which in most cases seems to be a pattern for numbering.
+  - **replace dot** with U+2024 in "dot + digit(s)". This targets cases like "1.2" in numbering or "12.345" in a thousands separator or a date like "20.12.2024". This happens because often numbers or dates were not explicitly marked as such.
+  - **replace dot** with U+2024 in "`>` + optional whitespaces + digit + dot". This target numbering which usually is immediately after some hilight or other markup. In general, a sequence like "1." could not be determined as a numbering rather than a mere number followed by a stop like in "ex art. 23."; but here we target a single digit preceded by a tag, with only whitespaces between them, which in most cases seems to be a pattern for numbering.
 
 ### Stage dots2
 
 XML scoped replacer by file:
 
-- replace dot with U+2024 in "U+2024 + digit(s) + dot". This ensures that a sequence in a numbering has no dot left (e.g. the last dot in "1.3.").
-- insert space before the last character in "punctuation + non-(WS/digit/`<`)" not preceded by `<xml`.
-- trim "WS + pucntuation + WS".
-- trim end of `</TEI>`.
-- replace dot with U+2024 in "currency symbol (`$£€`) + dot + whitespace(s) + digit".
+- **replace dot** with U+2024 in "U+2024 + digit(s) + dot". This ensures that a sequence in a numbering has no dot left (e.g. the last dot in "1.3.").
+- **insert space** before the last character in "punctuation + non-(WS/digit/`<`)" not preceded by `<xml`.
+- **trim left** of "WS + punctuation + WS".
+- **trim right** of `</TEI>`.
+- **replace dot** with U+2024 in "currency symbol (`$£€`) + dot + whitespace(s) + digit".
 
 ## Stage misc
 
 String replacer, by line:
 
-- replace code A0 with space (e.g. `il` + U+00A0 + `custode`).
-- replace `(...)` and `[...]` with their counterparts with the Unicode ellipsis character instead of 3 dots.
-- remove whitespace(s) in `“` + whitespaces or  whitespace(s) + `”`.
-- whitespaces + `%`: remove whitespaces (e.g. `del 75 % a carico`).
-- `(` + spaces: remove spaces.
-- spaces + `)`: remove spaces.
-- `ﬃ` and other ligatures replaced with their counterpart like `ffi` (e.g. `consolidata dell'Uﬃcio Edilizia`).
-- exclamation mark + closing bracket (e.g. `(SIC!)`): replace `!` with `¡`.
-- question mark + closing bracket (e.g. `(davvero?)`): replace `?` with `¿`.
-- `AEIOU` + `’`: replace with the corresponding accented uppercase letter.
-- `’` with `'`: smart quotes seem to be limited to cases of apostrophes only, so it is a required semantic adjustment for Unicode.
+- **replace U+00A0** with space (e.g. `il` + U+00A0 + `custode`).
+- **replace ellipses** `(...)` and `[...]` with their counterparts with the Unicode ellipsis character instead of 3 dots.
+- **remove whitespace(s)** in `“` + whitespaces or  whitespace(s) + `”`.
+- **remove whitespace(s)** in whitespaces + `%` (e.g. `del 75 % a carico`).
+- **remove spaces** in "`(` + spaces".
+- **remove spaces** in "spaces + `)`".
+- **replace ligatures** like `ﬃ` with their counterpart like `ffi` (e.g. `consolidata dell'Uﬃcio Edilizia`).
+- **replace !** in "exclamation mark + `)`" (e.g. `(SIC!)`): replace `!` with `¡`.
+- **replace ?** in "question mark + `)`" (e.g. `(davvero?)`): replace `?` with `¿`.
+- **replace with accented** uppercase: "`AEIOU` + `’`".
+- **replace smart quotes** `’` with `'`: smart quotes seem to be limited to cases of apostrophes only, so it is a required semantic adjustment for Unicode.
 
 ## Example
 
