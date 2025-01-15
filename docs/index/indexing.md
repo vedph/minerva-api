@@ -49,10 +49,12 @@ etc. This is the naming scheme resulting when you download files from their BLOB
 ./pythia check-meta c:/users/dfusi/desktop/ac/*.xml
 ```
 
+>You may also want to check the well-formedness of XML files if they have been manually edited, e.g. `.\Xutil.exe check c:\users\dfusi\desktop\ac\*.xml c:\users\dfusi\desktop\ac\_errors.txt`.
+
 ▶️ (5) **index** documents from your folder (you can add `-p` to preflight):
 
 ```bash
-./pythia index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o -x path -x gruppo-atto -x gruppo-nr
+./pythia index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o -x path -x gruppo-atto -x gruppo-nr --n-email dfusi@hotmail.com
 ```
 
 >The option `-x` is used to exclude document attributes from indexing. Here we exclude `path` which is an editorial detail about the BLOB store. When not indexing for the public application remove `-x gruppo-atto -x gruppo-nr` as groups make sense when documents themselves are not split.

@@ -159,7 +159,10 @@ Things to check which cannot be fixed automatically in a robust way:
 ▶️ (2) run the `proteus` tool with this command (adjust it according to your folder structure):
 
 ```bash
-./proteus filter c:/users/dfusi/desktop/ac/unfiltered/fi/*.xml c:/users/dfusi/desktop/ac/filters.json c:/users/dfusi/desktop/ac/fi/ -x xml
+./proteus filter c:/users/dfusi/desktop/ac/_unfiltered/fi/*.xml c:/users/dfusi/desktop/ac/filters.json c:/users/dfusi/desktop/ac/fi/ -x xml
+./proteus filter c:/users/dfusi/desktop/ac/_unfiltered/ge/*.xml c:/users/dfusi/desktop/ac/filters.json c:/users/dfusi/desktop/ac/ge/ -x xml
+./proteus filter c:/users/dfusi/desktop/ac/_unfiltered/le/*.xml c:/users/dfusi/desktop/ac/filters.json c:/users/dfusi/desktop/ac/le/ -x xml
+./proteus filter c:/users/dfusi/desktop/ac/_unfiltered/vt/*.xml c:/users/dfusi/desktop/ac/filters.json c:/users/dfusi/desktop/ac/vt/ -x xml
 ```
 
 >There will be an output file for each stage, the final output having extension `.xml` (option `-x`). You can then use any diffing tool to compare the filtered results with the originals.
