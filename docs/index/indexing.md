@@ -54,7 +54,7 @@ etc. This is the naming scheme resulting when you download files from their BLOB
 ▶️ (5) **index** documents from your folder (you can add `-p` to preflight):
 
 ```bash
-./pythia index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o -x path -x gruppo-atto -x gruppo-nr --n-email dfusi@hotmail.com
+./pythia index atti-chiari c:/users/dfusi/desktop/ac/*.xml -o -x path -x gruppo-atto -x gruppo-nr --n-email dafusi@gmail.com --n-span 30
 ```
 
 >The option `-x` is used to exclude document attributes from indexing. Here we exclude `path` which is an editorial detail about the BLOB store. When not indexing for the public application remove `-x gruppo-atto -x gruppo-nr` as groups make sense when documents themselves are not split.
@@ -123,7 +123,7 @@ psql -U postgres -d pythia -f c:/users/dfusi/desktop/pythia-nowords.sql
 ▶️ (7) build the **word index**:
 
 ```bash
-./pythia index-w -c ^date_value=3 -c ^nascita-avv=7 -x author -x data -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n abbr -n address -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s -p ABBR -p DATE -p EMAIL -p NUM -p PROPN -p SYM -p X
+./pythia index-w -c ^date_value=3 -c ^nascita-avv=7 -x author -x data -x date-value -x path -x gruppo-atto -x gruppo-nr -x sede-raccolta -n abbr -n address -n email -n foreign -n org-f -n org-m -n pn-f -n pn-m -n pn-s -p ABBR -p DATE -p EMAIL -p NUM -p PROPN -p SYM -p X --n-email dafusi@gmail.com --n-span 60
 ```
 
 >Option `-x` excludes the specified document attribute. Option `-n` excludes the words having any of the specified attributes (to remove proper names). Option `-c` defines the count of classes for document attribute bins. The `^` prefix before `date_value` means that we want integer only bins for that attribute, as it represents just a year value. Option `-p` excludes the specified POS from the index.
