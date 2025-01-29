@@ -5,7 +5,6 @@ using Serilog.Events;
 using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
-using System.Reflection;
 using System.Threading.RateLimiting;
 using Pythia.Api.Services;
 using System;
@@ -20,7 +19,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
 using System.Text.Json;
 using Corpus.Core;
 using Corpus.Sql;
@@ -378,7 +376,8 @@ public static class Program
             app.UseCors("CorsPolicy");
 
             // rate limiter
-            app.UseRateLimiter();
+            if (!config.GetValue<bool>("RateLimit:IsDisabled"))
+                app.UseRateLimiter();
 
             // HTTP request pipeline
             app.MapControllers();
