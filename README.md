@@ -5,8 +5,9 @@ This solution contains the backend API for the Minerva web application.
 🐋 Quick Docker image build:
 
 ```bash
-docker build . --build-arg BUILDPLATFORM=linux -t vedph2020/minerva-api:1.0.0 -t vedph2020/minerva-api:latest
-docker build . --build-arg BUILDPLATFORM=arm64 -t vedph2020/minerva-api_arm:1.0.0 -t vedph2020/minerva-api_arm:latest
+docker buildx create --use
+
+docker buildx build . --platform linux/amd64,linux/arm64 -t vedph2020/minerva-api:1.0.1 -t vedph2020/minerva-api:latest --push
 ```
 
 (replace with the current version).
@@ -32,6 +33,9 @@ docker run -it --rm --name mailslurper -p 8080:8080 -p 8085:8085 -p 2500:2500 ma
 
 ## History
 
+### 1.0.1
+
+- 2025-01-29: updated packages.
 - 2025-01-22: updated packages.
 - 2025-01-20: updated packages.
 - 2025-01-09: updated packages.
