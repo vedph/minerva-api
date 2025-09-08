@@ -33,6 +33,8 @@ docker run -it --rm --name mailslurper -p 8080:8080 -p 8085:8085 -p 2500:2500 ma
 
 ## History
 
+- 2025-09-08: updated packages.
+
 ### 1.1.3
 
 - 2025-07-29: updated packages.
