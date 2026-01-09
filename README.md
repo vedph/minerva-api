@@ -33,6 +33,7 @@ docker run -it --rm --name mailslurper -p 8080:8080 -p 8085:8085 -p 2500:2500 ma
 
 ## History
 
+- 2026-01-09: updated packages.
 - 2025-12-17: updated packages.
 - 2025-11-24: ⚠️ upgraded to NET 10.
 - 2025-09-29: updated packages.
