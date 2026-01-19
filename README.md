@@ -7,7 +7,7 @@ This solution contains the backend API for the Minerva web application.
 ```bash
 docker buildx create --use
 
-docker buildx build . --platform linux/amd64,linux/arm64,windows/amd64,windows/arm64 -t vedph2020/minerva-api:1.1.4 -t vedph2020/minerva-api:latest --push
+docker buildx build . --platform linux/amd64,linux/arm64,windows/amd64,windows/arm64 -t vedph2020/minerva-api:1.1.5 -t vedph2020/minerva-api:latest --push
 ```
 
 (replace with the current version).
@@ -33,9 +33,11 @@ docker run -it --rm --name mailslurper -p 8080:8080 -p 8085:8085 -p 2500:2500 ma
 
 ## History
 
-### 1.1.4
+### 1.1.5
 
-- 2026-01-19: updated packages.
+- 2026-01-19:
+  - updated packages.
+  - new Dockerfile for MacOS support. The old one is in `Dockerfile.old`.
 - 2026-01-09: updated packages.
 - 2025-12-17: updated packages.
 - 2025-11-24: ⚠️ upgraded to NET 10.
