@@ -16,11 +16,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Corpus.Api.Controllers" Version="11.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
-		<PackageReference Include="Pythia.Api.Models" Version="6.0.1" />
-		<PackageReference Include="Pythia.Api.Services" Version="6.0.1" />
-		<PackageReference Include="Scalar.AspNetCore" Version="2.12.4" />
+		<PackageReference Include="Corpus.Api.Controllers" Version="11.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
+		<PackageReference Include="Pythia.Api.Models" Version="6.0.2" />
+		<PackageReference Include="Pythia.Api.Services" Version="6.0.2" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.12.11" />
 		<PackageReference Include="Serilog.Settings.Configuration" Version="10.0.0" />
 	</ItemGroup>
 
