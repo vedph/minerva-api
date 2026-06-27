@@ -12,7 +12,7 @@ services:
       - minerva-network
 
   minerva-api:
-    image: vedph2020/minerva-api:1.1.4
+    image: vedph2020/minerva-api:1.1.6
     container_name: minerva-api
     ports:
         - 5180:8080
@@ -21,11 +21,14 @@ services:
     environment:
         - ASPNETCORE_URLS=http://+:8080
         - CONNECTIONSTRINGS__DEFAULT=User ID=postgres;Password=postgres;Host=minerva-pgsql;Port=5432;Database={0};
-        # - ALLOWEDORIGINS__0=http://www.something.com
+        - ALLOWEDORIGINS__0=http://localhost:4200
         - SEEDDELAY=30
         - MESSAGING__APIROOTURL=https://minerva.it/api/
         - MESSAGING__APPROOTURL=https://minerva.it/
         - MESSAGING__SUPPORTEMAIL=attichiari@unige.it
+    #    - DATA__SOURCEDIR=/opt/dump/
+    #volumes:
+    #    - /opt/dump:/opt/dump
     networks:
         - minerva-network
 
