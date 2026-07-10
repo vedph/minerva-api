@@ -1,5 +1,7 @@
 # History
 
+- 2026-07-10: updated packages.
+
 ## 1.1.6
 
 - 2026-06-26:
