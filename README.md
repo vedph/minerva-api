@@ -7,7 +7,7 @@ This solution contains the backend API for the Minerva web application.
 ```bash
 docker buildx create --use
 
-docker buildx build . --platform linux/amd64,linux/arm64,windows/amd64 -t vedph2020/minerva.api:1.1.6 -t vedph2020/minerva.api:latest --push
+docker buildx build . --platform linux/amd64,linux/arm64 -t vedph2020/minerva.api:2.0.0 -t vedph2020/minerva.api:latest --push
 ```
 
 (replace with the current version).
