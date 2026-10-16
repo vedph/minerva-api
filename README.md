@@ -12,14 +12,65 @@ docker buildx build . --platform linux/amd64,linux/arm64 -t vedph2020/minerva.ap
 
 (replace with the current version).
 
-Note that these API are not protected by authentication. Anyway they rely on two main technologies to limit the risk of attacks:
+## Server Settings
 
-- CORS, allowing only the web app to use the API.
-- rate limiting, which can be configured via `appsettings.json` and limits the requests per time-window. Parameters:
-  - `IsDisabled`: if `true`, the rate limiting is disabled. Default is `true`.
-  - `PermitLimit`: the number of requests allowed in the time window. Default is 100.
-  - `QueueLimit`: the number of requests that can be queued before the rate limit is enforced. Default is 0.
-  - `TimeWindow`: the time window in format `HH:MM:SS`. Default is `00:01:00` (1 minute).
+This API is public and has no authentication, and it is read-only (no write endpoints). In a server, set these options in `appsettings.json` or, more commonly, via environment variables in `docker-compose.yml` (a `:` in a setting path becomes `__`, and array items are numbered, e.g. `ForwardedHeaders:KnownNetworks[0]` is `FORWARDEDHEADERS__KNOWNNETWORKS__0`):
+
+| setting | environment variable | default | description |
+| --- | --- | --- | --- |
+| `AllowedOrigins` | `ALLOWEDORIGINS__0`, ... | | the origins of the web app (CORS). |
+| `Reader:IsFullTextDisabled` | `READER__ISFULLTEXTDISABLED` | `true` | never serve whole documents, but only the context of search results. Set to `false` only for the teammates API. |
+| `SearchExport:MaxRows` | `SEARCHEXPORT__MAXROWS` | `10000` | the maximum number of rows exported to CSV by a single request (0=unlimited). |
+| `ForwardedHeaders:KnownProxies` | `FORWARDEDHEADERS__KNOWNPROXIES__0` | | the IP addresses of the trusted reverse proxies (see below). |
+| `ForwardedHeaders:KnownNetworks` | `FORWARDEDHEADERS__KNOWNNETWORKS__0` | | the networks (CIDR, e.g. `172.16.0.0/12`) of the trusted reverse proxies (see below). |
+| `RateLimit:IsDisabled` | `RATELIMIT__ISDISABLED` | `true` | true to disable rate limiting. |
+| `RateLimit:PermitLimit` | `RATELIMIT__PERMITLIMIT` | `100` | the number of requests allowed to each client in the time window. |
+| `RateLimit:QueueLimit` | `RATELIMIT__QUEUELIMIT` | `0` | the number of requests over the limit which are queued (rather than rejected) until the next time window. |
+| `RateLimit:TimeWindow` | `RATELIMIT__TIMEWINDOW` | `00:01:00` | the time window, as `HH:MM:SS`. |
+
+Note that CORS only prevents other websites from using the API from their pages in a browser; it does not stop other kinds of clients, so the real protections are the read-only API, the full text restriction, the export limit, and rate limiting.
+
+### Rate Limiting
+
+When enabled, the rate limiter allows each client up to `PermitLimit` requests per `TimeWindow`; further requests get a 429 (Too Many Requests) response with a `Retry-After` header, until the window ends. Clients are identified by their **IP address**, so the limit only works as expected when the API sees the real client IP address. This is the most common cause of unexpected limit hits: when all the requests seem to come from the same address, all the users share a single quota, which is quickly exhausted.
+
+In Docker this happens when:
+
+- a **reverse proxy** (in Docker, like nginx-proxy, or in the host, like NGINX or Apache), providing HTTPS, forwards requests to the API container: the API sees the address of the proxy for every request;
+- even without a proxy, in some Docker setups (e.g. userland proxy, rootless Docker, Docker Desktop) the API sees the address of the Docker network gateway (like `172.18.0.1`) for every request.
+
+To check, set the `Serilog:MinimumLevel` to `Debug` (the default in `appsettings.json`) and look at the `Rate limit key: ...` lines in the API log while using the app from different machines: each user should have a different key. Rejected requests are logged as warnings (`Rate limit exceeded by ...`).
+
+The recommended setup in a VM is a **dockerized reverse proxy** ([nginx-proxy](https://github.com/nginx-proxy/nginx-proxy) with its LetsEncrypt companion), which provides HTTPS and routes each subdomain to its container via a shared Docker network (e.g. `nginx-proxy`). The proxy already sets the `X-Forwarded-For` header to the client address; the API must just trust it when coming from the proxy network:
+
+1. create the proxy network with a known subnet, e.g. `docker network create --subnet 172.30.0.0/16 nginx-proxy` (for an existing network, get it with `docker network inspect nginx-proxy -f '{{(index .IPAM.Config 0).Subnet}}'`).
+2. in the API service of `docker-compose.yml`, trust that network and enable the rate limiter. The proxy reaches the API via the Docker network, so its port needs not be published; if you publish it, bind it to localhost only, so that the API cannot be reached bypassing the proxy:
+
+    ```yml
+    minerva-api:
+      # optional
+      ports:
+        - 127.0.0.1:5180:8080
+      environment:
+        # ...
+        - VIRTUAL_HOST=minerva-api.YOURDOMAIN
+        - VIRTUAL_PORT=8080
+        - LETSENCRYPT_HOST=minerva-api.YOURDOMAIN
+        - FORWARDEDHEADERS__KNOWNNETWORKS__0=172.30.0.0/16
+        - RATELIMIT__ISDISABLED=false
+        - RATELIMIT__PERMITLIMIT=300
+        - RATELIMIT__TIMEWINDOW=00:01:00
+      networks:
+        - nginx-proxy
+    ```
+
+The same applies to the teammates API, if any (with its own subdomain). With a reverse proxy installed in the host rather than in Docker (e.g. NGINX with `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`, or Apache's `mod_proxy`, which sets it automatically), requests come from the Docker network gateway: trust `172.16.0.0/12` (the default Docker networks) or the address shown in the `Rate limit key` log lines. Without any proxy, do not set known networks or proxies: the API would trust forwarded headers sent by anyone.
+
+The frontend app container (NGINX serving static files) is not involved: the browser calls the API directly at the `apiUrl` of `env.js`.
+
+As for the limit value, consider that the app sends several requests for a single user action: e.g. a search sends 1 request per page; reading a result 2 requests; browsing the words index 1-2 requests for each expanded node or page. So, a very active user hardly sends more than 60-100 requests per minute. Yet, all the users behind the same NAT (e.g. a classroom, or a university network) share the same public IP address, and thus the same quota. A limit like 300 requests per minute is a reasonable compromise: it blocks automated scraping (which would anyway take hours for a large corpus) without affecting human users. Keep `QueueLimit` at 0: with a fixed time window, queued requests would just wait until the window ends, making the app look frozen rather than reporting an error.
+
+When the mailer is enabled (`Mailer:IsEnabled`), limit hits are notified by email to `Mailer:Recipients`, at most once every 30 minutes.
 
 To locally test messaging you can use [MailSlurper](https://github.com/mailslurper/mailslurper):
 

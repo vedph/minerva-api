@@ -113,6 +113,28 @@ public static class Program
     #endregion
 
     #region Rate limiter
+    // the minimum interval between two rate limit exceeded notifications
+    private static readonly TimeSpan _limitNotificationInterval =
+        TimeSpan.FromMinutes(30);
+    private static long _lastLimitNotificationTicks;
+
+    /// <summary>
+    /// Determines whether a rate limit exceeded notification should be
+    /// sent, i.e. whether no other notification was sent in the last
+    /// <see cref="_limitNotificationInterval"/>. This avoids sending a
+    /// message for each rejected request.
+    /// </summary>
+    /// <returns>True to notify.</returns>
+    private static bool ShouldNotifyLimitExceeded()
+    {
+        long now = DateTime.UtcNow.Ticks;
+        long last = System.Threading.Interlocked.Read(
+            ref _lastLimitNotificationTicks);
+        if (now - last < _limitNotificationInterval.Ticks) return false;
+        return System.Threading.Interlocked.CompareExchange(
+            ref _lastLimitNotificationTicks, now, last) == last;
+    }
+
     private static async Task NotifyLimitExceededToRecipients(IConfiguration config,
         IHostEnvironment hostEnvironment)
     {
@@ -167,6 +189,49 @@ public static class Program
                 message);
             Log.Logger.Information("Email message sent");
         }
+    }
+
+    /// <summary>
+    /// Gets the forwarded headers options for use with a reverse proxy.
+    /// This lets the API (and its rate limiter) see the client's IP address
+    /// rather than the proxy's one. Besides localhost, only the proxies
+    /// listed in <c>ForwardedHeaders:KnownProxies</c> (IP addresses) or
+    /// belonging to the networks listed in
+    /// <c>ForwardedHeaders:KnownNetworks</c> (CIDR, e.g.
+    /// <c>172.16.0.0/12</c>) are trusted.
+    /// </summary>
+    /// <param name="config">The configuration.</param>
+    /// <returns>Options.</returns>
+    private static ForwardedHeadersOptions GetForwardedHeadersOptions(
+        IConfiguration config)
+    {
+        ForwardedHeadersOptions options = new()
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                | ForwardedHeaders.XForwardedProto
+        };
+        foreach (string proxy in config.GetSection(
+            "ForwardedHeaders:KnownProxies").Get<string[]>() ?? [])
+        {
+            if (IPAddress.TryParse(proxy, out IPAddress? address))
+                options.KnownProxies.Add(address);
+            else
+                Log.Warning("Invalid known proxy address: {Proxy}", proxy);
+        }
+        foreach (string network in config.GetSection(
+            "ForwardedHeaders:KnownNetworks").Get<string[]>() ?? [])
+        {
+            if (System.Net.IPNetwork.TryParse(network,
+                out System.Net.IPNetwork net))
+            {
+                options.KnownIPNetworks.Add(net);
+            }
+            else
+            {
+                Log.Warning("Invalid known network: {Network}", network);
+            }
+        }
+        return options;
     }
 
     private static void ConfigureRateLimiterService(IServiceCollection services,
@@ -230,19 +295,26 @@ public static class Program
 
             options.OnRejected = async (context, token) =>
             {
-                Log.Warning("Rate limit exceeded");
+                Log.Warning("Rate limit exceeded by {Key}: {Path}",
+                    context.HttpContext.User.Identity?.Name
+                    ?? context.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    context.HttpContext.Request.Path);
 
                 // 429 too many requests
                 context.HttpContext.Response.StatusCode = 429;
                 context.HttpContext.Response.ContentType = "application/json";
 
-                // send
-                await NotifyLimitExceededToRecipients(config, hostEnvironment);
+                // send (throttled, as a burst of requests can be rejected)
+                if (ShouldNotifyLimitExceeded())
+                    await NotifyLimitExceededToRecipients(config, hostEnvironment);
 
                 // ret JSON with error
                 if (context.Lease.TryGetMetadata(MetadataName.RetryAfter,
                     out var retryAfter))
                 {
+                    context.HttpContext.Response.Headers.RetryAfter =
+                        ((int)Math.Ceiling(retryAfter.TotalSeconds))
+                        .ToString(CultureInfo.InvariantCulture);
                     await context.HttpContext.Response.WriteAsync("{\"error\": " +
                         "\"Too many requests. Please try again after " +
                         $"{retryAfter.TotalMinutes} minute(s).\"" +
@@ -397,21 +469,8 @@ public static class Program
 
             // forward headers for use with a reverse proxy: this lets the
             // rate limiter partition requests by the client's IP address,
-            // rather than by the proxy's one. Only proxies listed in
-            // ForwardedHeaders:KnownProxies (IP addresses) are trusted,
-            // besides localhost.
-            ForwardedHeadersOptions forwardedOptions = new()
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor
-                    | ForwardedHeaders.XForwardedProto
-            };
-            foreach (string proxy in config.GetSection(
-                "ForwardedHeaders:KnownProxies").Get<string[]>() ?? [])
-            {
-                if (IPAddress.TryParse(proxy, out IPAddress? address))
-                    forwardedOptions.KnownProxies.Add(address);
-            }
-            app.UseForwardedHeaders(forwardedOptions);
+            // rather than by the proxy's one
+            app.UseForwardedHeaders(GetForwardedHeadersOptions(config));
 
             // CORS
             app.UseCors("CorsPolicy");

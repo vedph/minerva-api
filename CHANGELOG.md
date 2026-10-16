@@ -11,8 +11,12 @@
     - document maps were cached forever; they now expire after 30 minutes of inactivity.
     - CSV export: the export task was not awaited, so that the response could be closed while still writing; the export now uses the same literal filters and sort fields of the search; search results contexts are fetched in batches (as in Pythia) to avoid PostgreSQL shared memory errors; search errors are logged.
   - added forwarded headers support (`X-Forwarded-For`, `X-Forwarded-Proto`), so that behind a reverse proxy the rate limiter partitions requests by client IP address rather than by the proxy's one. Besides localhost, only the proxies listed in `ForwardedHeaders:KnownProxies` are trusted (e.g. env `FORWARDEDHEADERS__KNOWNPROXIES__0=172.18.0.5`).
+  - removed the unused JWT settings.
+  - besides single proxies, trusted proxy networks can be set in `ForwardedHeaders:KnownNetworks` (CIDR, e.g. env `FORWARDEDHEADERS__KNOWNNETWORKS__0=172.16.0.0/12`), which is required when a reverse proxy in the Docker host forwards requests to the API container.
+  - search errors: only query errors (like syntax errors) are returned to users with their message; any other error (e.g. from the database) is logged, and users just get a generic message.
   - the startup dump of environment variables no longer logs secrets, like the database password in the connection string.
-  - the rate limiter rejection response is marked as JSON, and its partition key is logged as debug rather than information.
+  - the rate limiter rejection response is marked as JSON and has a `Retry-After` header; its partition key is logged as debug rather than information; rejections log the client key and path; the rate limit exceeded email notification is sent at most once every 30 minutes, rather than once for each rejected request (which also delayed the 429 response).
+  - README: added a guide for server settings, including rate limiting behind a reverse proxy.
 
 ## 2.0.0
 

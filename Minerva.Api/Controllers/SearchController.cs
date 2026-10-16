@@ -5,6 +5,7 @@ using Pythia.Api.Models;
 using Pythia.Api.Services;
 using Pythia.Core;
 using Pythia.Core.Analysis;
+using Pythia.Core.Query;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -105,12 +106,26 @@ public sealed class SearchController(IIndexRepository repository,
                 Value = wrapped
             });
         }
-        catch (Exception ex)
+        catch (PythiaQueryException ex)
         {
-            _logger.LogWarning(ex, "Error searching {Query}", model.Query);
+            // an error in the query (e.g. a syntax error): its message is
+            // safe and useful for users
+            _logger.LogInformation("Query error: {Message}: {Query}",
+                ex.Message, model.Query);
             return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
             {
                 Error = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            // any other error (e.g. from the database) is logged, but its
+            // details are not exposed to users
+            _logger.LogError(ex, "Error searching {Query}", model.Query);
+            return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
+            {
+                Error = "The search could not be executed. " +
+                    "Please check your query or try again later."
             });
         }
     }
