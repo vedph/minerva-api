@@ -1,5 +1,19 @@
 # History
 
+- 2026-10-16:
+  - ⚠️ updated packages to Pythia 12.1.2 (required, as these changes depend on it).
+  - ⚠️ the API no longer serves the full text of documents, as it is public: new `Reader:IsFullTextDisabled` setting (env `READER__ISFULLTEXTDISABLED`), **true by default**. When true, `documents/{id}/text`, `documents/{id}/map` and `documents/{id}/path/{path}` return 403; `documents/{id}?content=true` returns no content; `documents/{id}/range/{start}/{end}` returns 403 when the context would include the whole document map (e.g. any range wider than the map). Set it to false only for an API used by teammates, who can read whole documents.
+  - ⚠️ search CSV export is limited to `SearchExport:MaxRows` results per request (env `SEARCHEXPORT__MAXROWS`, default 10000; 0=unlimited). The frontend exports all the results, so that a single anonymous request for a very frequent word loaded the database for a long time (and provided the contexts of all its occurrences).
+  - profiles are returned without their content (the indexing configuration), which is not used by the frontend.
+  - `ReaderController` and `SearchController` were updated with the fixes of the corresponding Pythia controllers:
+    - reading a search result inside the last node of a document map (e.g. the last paragraph) returned the whole document text instead of its context.
+    - reading documents having several attributes with the same name failed with a 500 error; a missing text or map now returns 404 rather than 500; contexts spanning nodes on different map levels were not well-formed (500).
+    - document maps were cached forever; they now expire after 30 minutes of inactivity.
+    - CSV export: the export task was not awaited, so that the response could be closed while still writing; the export now uses the same literal filters and sort fields of the search; search results contexts are fetched in batches (as in Pythia) to avoid PostgreSQL shared memory errors; search errors are logged.
+  - added forwarded headers support (`X-Forwarded-For`, `X-Forwarded-Proto`), so that behind a reverse proxy the rate limiter partitions requests by client IP address rather than by the proxy's one. Besides localhost, only the proxies listed in `ForwardedHeaders:KnownProxies` are trusted (e.g. env `FORWARDEDHEADERS__KNOWNPROXIES__0=172.18.0.5`).
+  - the startup dump of environment variables no longer logs secrets, like the database password in the connection string.
+  - the rate limiter rejection response is marked as JSON, and its partition key is logged as debug rather than information.
+
 ## 2.0.0
 
 - 2026-08-31: updated packages.

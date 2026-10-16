@@ -25,6 +25,8 @@ using Corpus.Sql;
 using Pythia.Core;
 using Pythia.Sql.PgSql;
 using Scalar.AspNetCore;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Net;
 
 namespace Minerva.Api;
 
@@ -45,7 +47,23 @@ public static class Program
         }
 
         foreach (string key in keys.Order())
-            Log.Information("{Key} = {Value}", key, dct[key]);
+        {
+            Log.Information("{Key} = {Value}", key,
+                IsSecretKey(key) ? "***" : dct[key]);
+        }
+    }
+
+    /// <summary>
+    /// True if the environment variable with the specified name might
+    /// contain a secret (like the database password in the connection
+    /// string), which must not be written to logs.
+    /// </summary>
+    private static bool IsSecretKey(string key)
+    {
+        string k = key.ToUpperInvariant();
+        return k.Contains("CONNECTIONSTRING") || k.Contains("PASSWORD") ||
+            k.Contains("SECRET") || k.Contains("SECUREKEY") ||
+            k.Contains("TOKEN") || k.Contains("APIKEY");
     }
 
     #region Options
@@ -56,6 +74,10 @@ public static class Program
         // https://andrewlock.net/adding-validation-to-strongly-typed-configuration-objects-in-asp-net-core/
         services.Configure<MessagingOptions>(config.GetSection("Messaging"));
         services.Configure<DotNetMailerOptions>(config.GetSection("Mailer"));
+        services.Configure<ReaderOptions>(
+            config.GetSection(ReaderOptions.SECTION_NAME));
+        services.Configure<SearchExportOptions>(
+            config.GetSection(SearchExportOptions.SECTION_NAME));
 
         // explicitly register the settings object by delegating to the IOptions object
         services.AddSingleton(resolver =>
@@ -193,7 +215,7 @@ public static class Program
                 string key = httpContext.User.Identity?.Name
                     ?? httpContext.Connection.RemoteIpAddress?.ToString()
                     ?? "unknown";
-                Log.Information("Rate limit key: {Key}", key);
+                Log.Debug("Rate limit key: {Key}", key);
 
                 return RateLimitPartition.GetFixedWindowLimiter(
                     partitionKey: key,
@@ -212,6 +234,7 @@ public static class Program
 
                 // 429 too many requests
                 context.HttpContext.Response.StatusCode = 429;
+                context.HttpContext.Response.ContentType = "application/json";
 
                 // send
                 await NotifyLimitExceededToRecipients(config, hostEnvironment);
@@ -371,6 +394,24 @@ public static class Program
 
             // seed
             await app.SeedAsync();
+
+            // forward headers for use with a reverse proxy: this lets the
+            // rate limiter partition requests by the client's IP address,
+            // rather than by the proxy's one. Only proxies listed in
+            // ForwardedHeaders:KnownProxies (IP addresses) are trusted,
+            // besides localhost.
+            ForwardedHeadersOptions forwardedOptions = new()
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                    | ForwardedHeaders.XForwardedProto
+            };
+            foreach (string proxy in config.GetSection(
+                "ForwardedHeaders:KnownProxies").Get<string[]>() ?? [])
+            {
+                if (IPAddress.TryParse(proxy, out IPAddress? address))
+                    forwardedOptions.KnownProxies.Add(address);
+            }
+            app.UseForwardedHeaders(forwardedOptions);
 
             // CORS
             app.UseCors("CorsPolicy");

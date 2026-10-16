@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
@@ -17,6 +18,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Minerva.Api.Services;
 
 namespace Minerva.Api.Controllers;
 
@@ -30,13 +33,19 @@ namespace Minerva.Api.Controllers;
 /// <param name="repository">The repository.</param>
 /// <param name="factoryProvider">The factory provider, used to get
 /// the optional literal filters.</param>
+/// <param name="logger">The logger.</param>
+/// <param name="environment">The hosting environment</param>
+/// <param name="exportOptions">The search export options.</param>
 [ApiController]
 [Route("api/search")]
 public sealed class SearchController(IIndexRepository repository,
     IQueryPythiaFactoryProvider factoryProvider,
     ILogger<SearchController> logger,
-    IWebHostEnvironment environment) : ControllerBase
+    IWebHostEnvironment environment,
+    IOptions<SearchExportOptions> exportOptions) : ControllerBase
 {
+    private readonly SearchExportOptions _exportOptions = exportOptions?.Value
+        ?? throw new ArgumentNullException(nameof(exportOptions));
     private readonly IIndexRepository _repository = repository
         ?? throw new ArgumentNullException(nameof(repository));
     private readonly IQueryPythiaFactoryProvider _factoryProvider = factoryProvider
@@ -73,10 +82,23 @@ public sealed class SearchController(IIndexRepository repository,
                 SortFields = model.SortFields
             }, filters);
 
-            IList<KwicSearchResult> results =
-                _repository.GetResultContext(page.Items, model.ContextSize ?? 5);
+            // Process results in smaller batches to avoid PostgreSQL
+            // shared memory issues with large UNION queries
+            const int contextBatchSize = 20;
+            List<KwicSearchResult> allResults = [];
+            for (int i = 0; i < page.Items.Count; i += contextBatchSize)
+            {
+                int batchCount = Math.Min(contextBatchSize, page.Items.Count - i);
+                List<SearchResult> batch = [.. page.Items
+                    .Skip(i)
+                    .Take(batchCount)];
+                IList<KwicSearchResult> batchResults =
+                    _repository.GetResultContext(batch, model.ContextSize ?? 5);
+                allResults.AddRange(batchResults);
+            }
+
             DataPage<KwicSearchResult> wrapped =
-                new(model.PageNumber, model.PageSize, page.Total, results);
+                new(model.PageNumber, model.PageSize, page.Total, allResults);
 
             return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
             {
@@ -85,7 +107,7 @@ public sealed class SearchController(IIndexRepository repository,
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex.ToString());
+            _logger.LogWarning(ex, "Error searching {Query}", model.Query);
             return Ok(new ResultWrapperModel<DataPage<KwicSearchResult>>
             {
                 Error = ex.Message
@@ -138,36 +160,66 @@ public sealed class SearchController(IIndexRepository repository,
     {
         try
         {
-            // prepare the search request
+            // prepare the search request, with the same sort fields and
+            // literal filters used by the search endpoint, so that the
+            // exported results are the same of the search
             SearchRequest request = new()
             {
                 Query = model.Query,
                 PageNumber = model.PageNumber,
-                PageSize = model.PageSize
+                PageSize = model.PageSize,
+                SortFields = model.SortFields
             };
+            IList<ILiteralFilter> filters = _factoryProvider.GetFactory()
+                .GetLiteralFilters();
 
             int lastPage = model.LastPage ?? 0;
+            int maxRows = _exportOptions.MaxRows;
+            int rowCount = 0;
 
             while ((lastPage == 0 || request.PageNumber <= lastPage) &&
                 !cancel.IsCancellationRequested)
             {
+                // stop at the maximum number of rows, if any
+                if (maxRows > 0 && rowCount >= maxRows)
+                {
+                    _logger.LogInformation("Export stopped at the limit of " +
+                        "{MaxRows} rows: {Query}", maxRows, model.Query);
+                    break;
+                }
+
                 // perform the search
-                DataPage<SearchResult> page = _repository.Search(request);
+                DataPage<SearchResult> page = _repository.Search(request,
+                    filters);
                 if (page.PageCount == 0) break;
 
                 // update last page if needed
                 if (lastPage == 0 || lastPage > page.PageCount)
                     lastPage = page.PageCount;
 
-                // get the result context
-                IList<KwicSearchResult> results = _repository.GetResultContext(
-                    page.Items, model.ContextSize ?? 5);
-
-                // write results to CSV
-                foreach (var result in results)
+                // Process results in smaller batches to avoid PostgreSQL
+                // shared memory issues with large UNION queries
+                const int contextBatchSize = 20;
+                for (int i = 0; i < page.Items.Count; i += contextBatchSize)
                 {
-                    WriteCsvResult(result, csvWriter);
-                    await csvWriter.FlushAsync();
+                    int batchCount = Math.Min(contextBatchSize, page.Items.Count - i);
+                    List<SearchResult> batch = [.. page.Items
+                        .Skip(i)
+                        .Take(batchCount)];
+
+                    // get the result context for this batch
+                    IList<KwicSearchResult> results = _repository.GetResultContext(
+                        batch, model.ContextSize ?? 5);
+
+                    // write results to CSV
+                    foreach (var result in results)
+                    {
+                        if (maxRows > 0 && rowCount >= maxRows) break;
+                        WriteCsvResult(result, csvWriter);
+                        await csvWriter.FlushAsync();
+                        rowCount++;
+                    }
+                    if (maxRows > 0 && rowCount >= maxRows) break;
                 }
 
                 // move to the next page
@@ -185,6 +237,17 @@ public sealed class SearchController(IIndexRepository repository,
         }
     }
 
+    /// <summary>
+    /// Exports search results as a CSV file based on the provided search criteria.
+    /// </summary>
+    /// <remarks>If the query parameter is null or empty, a BadRequest response
+    /// is returned. The method handles cancellation if the client disconnects
+    /// during the export process.</remarks>
+    /// <param name="model">The model containing the search query and context
+    /// size for the export operation. The query parameter must not be
+    /// null or empty.</param>
+    /// <returns>An IActionResult representing the result of the export operation,
+    /// which will trigger a CSV file download if successful.</returns>
     [HttpGet("csv")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -194,17 +257,17 @@ public sealed class SearchController(IIndexRepository repository,
     {
         if (string.IsNullOrWhiteSpace(model.Query))
             return BadRequest("Query is required.");
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        _logger.LogInformation("Export search: {SearchModel}\n", model);
+        _logger.LogInformation("Export search: {SearchModel}", model);
 
         // set response headers for CSV download
         Response.Headers.Append(
             "Content-Disposition", "attachment; filename=search_results.csv");
         Response.ContentType = "text/csv";
 
-        // create a token that will be canceled when the client disconnects
-        using CancellationTokenSource cts = new();
-        HttpContext.RequestAborted.Register(() => cts.Cancel());
+        // this token is canceled when the client disconnects
+        CancellationToken cancel = HttpContext.RequestAborted;
 
         // use a custom StreamWriter that writes to the response body
         await using StreamWriter streamWriter = new(Response.Body, Encoding.UTF8);
@@ -214,18 +277,24 @@ public sealed class SearchController(IIndexRepository repository,
         // write the CSV header
         WriteCsvHeader(model.ContextSize ?? 5, csvWriter);
 
-        // start the export process as a low-priority task
+        // run the export (which uses synchronous database calls) on a
+        // thread pool thread, awaiting its completion: the writers must not
+        // be disposed before the export ends
         try
         {
-            await Task.Factory.StartNew(
-                async () => await ExportDataAsync(model, csvWriter, cts.Token),
-                cts.Token,
-                TaskCreationOptions.LongRunning,
-                TaskScheduler.Default);
+            await Task.Run(() => ExportDataAsync(model, csvWriter, cancel),
+                cancel);
+        }
+        catch (OperationCanceledException)
+        {
+            // the client disconnected
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error starting export task");
+            _logger.LogError(ex, "Error running export task");
+
+            // once the response has started, its status can no more change
+            if (Response.HasStarted) return new EmptyResult();
 
             if (!_environment.IsProduction())
             {

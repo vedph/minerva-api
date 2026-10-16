@@ -23,6 +23,8 @@ services:
         - CONNECTIONSTRINGS__DEFAULT=User ID=postgres;Password=postgres;Host=minerva-pgsql;Port=5432;Database={0};
         - ALLOWEDORIGINS__0=http://localhost:4200
         - SEEDDELAY=30
+        # public API: never serve the full text of documents
+        - READER__ISFULLTEXTDISABLED=true
         - MESSAGING__APIROOTURL=https://minerva.it/api/
         - MESSAGING__APPROOTURL=https://minerva.it/
         - MESSAGING__SUPPORTEMAIL=attichiari@unige.it

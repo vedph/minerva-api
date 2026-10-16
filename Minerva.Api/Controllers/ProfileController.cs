@@ -37,7 +37,8 @@ public sealed class ProfileController(IIndexRepository repository) : ControllerB
     public ActionResult<DataPage<IProfile>> GetProfiles(
         [FromQuery] ProfileFilterBindingModel model)
     {
-        return Ok(_repository.GetProfiles(model.ToFilter()));
+        // profiles content (the indexing configuration) is not public
+        return Ok(_repository.GetProfiles(model.ToFilter(), true));
     }
 
     /// <summary>
@@ -50,7 +51,7 @@ public sealed class ProfileController(IIndexRepository repository) : ControllerB
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<IProfile> GetProfile([FromRoute] string id)
     {
-        IProfile? profile = _repository.GetProfile(id);
+        IProfile? profile = _repository.GetProfile(id, true);
         if (profile == null) return NotFound();
         return Ok(profile);
     }
