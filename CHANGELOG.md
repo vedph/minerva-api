@@ -1,5 +1,7 @@
 # History
 
+## 2.1.0
+
 - 2026-10-16:
   - ⚠️ updated packages to Pythia 12.1.2 (required, as these changes depend on it).
   - ⚠️ the API no longer serves the full text of documents, as it is public: new `Reader:IsFullTextDisabled` setting (env `READER__ISFULLTEXTDISABLED`), **true by default**. When true, `documents/{id}/text`, `documents/{id}/map` and `documents/{id}/path/{path}` return 403; `documents/{id}?content=true` returns no content; `documents/{id}/range/{start}/{end}` returns 403 when the context would include the whole document map (e.g. any range wider than the map). Set it to false only for an API used by teammates, who can read whole documents.

@@ -4,13 +4,27 @@ This solution contains the backend API for the Minerva web application.
 
 🐋 Quick Docker image build:
 
-```bash
-docker buildx create --use
+🐋 Before creating Docker images, ensure you have a buildx builder instance running that supports multi-arch and that you have run `buildnpub.ps1` publishing NuGet packages:
 
-docker buildx build . --platform linux/amd64,linux/arm64 -t vedph2020/minerva.api:2.0.0 -t vedph2020/minerva.api:latest --push
+```sh
+docker buildx create --use --name multi-arch-builder || docker buildx use multi-arch-builder
+docker buildx inspect --bootstrap
 ```
 
-(replace with the current version).
+> To run natively on Linux VMs, macOS (both Intel and Apple Silicon), and Windows (via WSL2 or Docker Desktop)—`linux/amd64` and `linux/arm64` are the only two targets we need. Note that `docker buildx` automatically injects variables like `TARGETARCH` and `TARGETOS` into the scope of your build. In `Dockerfile` we pass these directly to the .NET CLI commands.
+
+These commands build for multiple platforms and push directly to Docker Hub:
+
+- 🐋 **Minerva.Api**:
+
+```sh
+docker buildx build --platform linux/amd64,linux/arm64 -t vedph2020/minerva-api:2.1.0 -t vedph2020/minerva-api:latest --push .
+```
+
+> When there is no available ARM image, add `platform: linux/amd64` as a sibling of the `image` line in docker compose script to force Docker to pull and run the x64 image under emulation, e.g.:
+
+- add `platform: linux/arm64` to MongoDB and PostgreSQL. Note that some images (especially for PostgreSQL) are not available for ARM, so you may need to add `platform: linux/amd64` to them too or downgrade to a version which supports ARM (e.g. `image: postgres:16`).
+- add `platform: linux/amd64` to API and app.
 
 ## Server Settings
 
