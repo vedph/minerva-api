@@ -1,5 +1,9 @@
 # History
 
+## 3.0.0
+
+- 2026-10-22: ⚠️ updated packages (Pythia v13).
+
 ## 2.1.0
 
 - 2026-10-16:

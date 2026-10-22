@@ -18,7 +18,7 @@ These commands build for multiple platforms and push directly to Docker Hub:
 - 🐋 **Minerva.Api**:
 
 ```sh
-docker buildx build --platform linux/amd64,linux/arm64 -t vedph2020/minerva-api:2.1.0 -t vedph2020/minerva-api:latest --push .
+docker buildx build --platform linux/amd64,linux/arm64 -t vedph2020/minerva-api:3.0.0 -t vedph2020/minerva-api:latest --push .
 ```
 
 > When there is no available ARM image, add `platform: linux/amd64` as a sibling of the `image` line in docker compose script to force Docker to pull and run the x64 image under emulation, e.g.:
@@ -30,17 +30,17 @@ docker buildx build --platform linux/amd64,linux/arm64 -t vedph2020/minerva-api:
 
 This API is public and has no authentication, and it is read-only (no write endpoints). In a server, set these options in `appsettings.json` or, more commonly, via environment variables in `docker-compose.yml` (a `:` in a setting path becomes `__`, and array items are numbered, e.g. `ForwardedHeaders:KnownNetworks[0]` is `FORWARDEDHEADERS__KNOWNNETWORKS__0`):
 
-| setting | environment variable | default | description |
-| --- | --- | --- | --- |
-| `AllowedOrigins` | `ALLOWEDORIGINS__0`, ... | | the origins of the web app (CORS). |
-| `Reader:IsFullTextDisabled` | `READER__ISFULLTEXTDISABLED` | `true` | never serve whole documents, but only the context of search results. Set to `false` only for the teammates API. |
-| `SearchExport:MaxRows` | `SEARCHEXPORT__MAXROWS` | `10000` | the maximum number of rows exported to CSV by a single request (0=unlimited). |
-| `ForwardedHeaders:KnownProxies` | `FORWARDEDHEADERS__KNOWNPROXIES__0` | | the IP addresses of the trusted reverse proxies (see below). |
-| `ForwardedHeaders:KnownNetworks` | `FORWARDEDHEADERS__KNOWNNETWORKS__0` | | the networks (CIDR, e.g. `172.16.0.0/12`) of the trusted reverse proxies (see below). |
-| `RateLimit:IsDisabled` | `RATELIMIT__ISDISABLED` | `true` | true to disable rate limiting. |
-| `RateLimit:PermitLimit` | `RATELIMIT__PERMITLIMIT` | `100` | the number of requests allowed to each client in the time window. |
-| `RateLimit:QueueLimit` | `RATELIMIT__QUEUELIMIT` | `0` | the number of requests over the limit which are queued (rather than rejected) until the next time window. |
-| `RateLimit:TimeWindow` | `RATELIMIT__TIMEWINDOW` | `00:01:00` | the time window, as `HH:MM:SS`. |
+| setting                          | environment variable                 | default    | description                                                                                                     |
+| -------------------------------- | ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------- |
+| `AllowedOrigins`                 | `ALLOWEDORIGINS__0`, ...             |            | the origins of the web app (CORS).                                                                              |
+| `Reader:IsFullTextDisabled`      | `READER__ISFULLTEXTDISABLED`         | `true`     | never serve whole documents, but only the context of search results. Set to `false` only for the teammates API. |
+| `SearchExport:MaxRows`           | `SEARCHEXPORT__MAXROWS`              | `10000`    | the maximum number of rows exported to CSV by a single request (0=unlimited).                                   |
+| `ForwardedHeaders:KnownProxies`  | `FORWARDEDHEADERS__KNOWNPROXIES__0`  |            | the IP addresses of the trusted reverse proxies (see below).                                                    |
+| `ForwardedHeaders:KnownNetworks` | `FORWARDEDHEADERS__KNOWNNETWORKS__0` |            | the networks (CIDR, e.g. `172.16.0.0/12`) of the trusted reverse proxies (see below).                           |
+| `RateLimit:IsDisabled`           | `RATELIMIT__ISDISABLED`              | `true`     | true to disable rate limiting.                                                                                  |
+| `RateLimit:PermitLimit`          | `RATELIMIT__PERMITLIMIT`             | `100`      | the number of requests allowed to each client in the time window.                                               |
+| `RateLimit:QueueLimit`           | `RATELIMIT__QUEUELIMIT`              | `0`        | the number of requests over the limit which are queued (rather than rejected) until the next time window.       |
+| `RateLimit:TimeWindow`           | `RATELIMIT__TIMEWINDOW`              | `00:01:00` | the time window, as `HH:MM:SS`.                                                                                 |
 
 Note that CORS only prevents other websites from using the API from their pages in a browser; it does not stop other kinds of clients, so the real protections are the read-only API, the full text restriction, the export limit, and rate limiting.
 
@@ -60,23 +60,23 @@ The recommended setup in a VM is a **dockerized reverse proxy** ([nginx-proxy](h
 1. create the proxy network with a known subnet, e.g. `docker network create --subnet 172.30.0.0/16 nginx-proxy` (for an existing network, get it with `docker network inspect nginx-proxy -f '{{(index .IPAM.Config 0).Subnet}}'`).
 2. in the API service of `docker-compose.yml`, trust that network and enable the rate limiter. The proxy reaches the API via the Docker network, so its port needs not be published; if you publish it, bind it to localhost only, so that the API cannot be reached bypassing the proxy:
 
-    ```yml
-    minerva-api:
-      # optional
-      ports:
-        - 127.0.0.1:5180:8080
-      environment:
-        # ...
-        - VIRTUAL_HOST=minerva-api.YOURDOMAIN
-        - VIRTUAL_PORT=8080
-        - LETSENCRYPT_HOST=minerva-api.YOURDOMAIN
-        - FORWARDEDHEADERS__KNOWNNETWORKS__0=172.30.0.0/16
-        - RATELIMIT__ISDISABLED=false
-        - RATELIMIT__PERMITLIMIT=300
-        - RATELIMIT__TIMEWINDOW=00:01:00
-      networks:
-        - nginx-proxy
-    ```
+   ```yml
+   minerva-api:
+     # optional
+     ports:
+       - 127.0.0.1:5180:8080
+     environment:
+       # ...
+       - VIRTUAL_HOST=minerva-api.YOURDOMAIN
+       - VIRTUAL_PORT=8080
+       - LETSENCRYPT_HOST=minerva-api.YOURDOMAIN
+       - FORWARDEDHEADERS__KNOWNNETWORKS__0=172.30.0.0/16
+       - RATELIMIT__ISDISABLED=false
+       - RATELIMIT__PERMITLIMIT=300
+       - RATELIMIT__TIMEWINDOW=00:01:00
+     networks:
+       - nginx-proxy
+   ```
 
 The same applies to the teammates API, if any (with its own subdomain). With a reverse proxy installed in the host rather than in Docker (e.g. NGINX with `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`, or Apache's `mod_proxy`, which sets it automatically), requests come from the Docker network gateway: trust `172.16.0.0/12` (the default Docker networks) or the address shown in the `Rate limit key` log lines. Without any proxy, do not set known networks or proxies: the API would trust forwarded headers sent by anyone.
 
