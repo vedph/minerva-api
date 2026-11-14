@@ -1,5 +1,9 @@
 # History
 
+## 4.0.0
+
+- 2026-11-14: ⚠️ upgraded to .NET 11. Note that Entity Framework Core related packages are not yet updated as we wait for the PostgreSQL provider to be released.
+
 ## 3.0.0
 
 - 2026-10-22: ⚠️ updated packages (Pythia v13).

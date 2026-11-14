@@ -8,8 +8,6 @@ using Pythia.Core.Analysis;
 using Pythia.Core.Query;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -20,7 +18,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Minerva.Api.Services;
 
 namespace Minerva.Api.Controllers;
 
@@ -147,7 +144,7 @@ public sealed class SearchController(IIndexRepository repository,
         csv.WriteField("author");
         csv.WriteField("title");
         csv.WriteField("sort");
-        csv.NextRecord();
+        csv.EndRecord();
     }
 
     private static void WriteCsvResult(KwicSearchResult result, CsvWriter csv)
@@ -167,7 +164,7 @@ public sealed class SearchController(IIndexRepository repository,
         csv.WriteField(result.Author);
         csv.WriteField(result.Title);
         csv.WriteField(result.SortKey);
-        csv.NextRecord();
+        csv.EndRecord();
     }
 
     private async Task ExportDataAsync(ExportSearchBindingModel model,
@@ -286,8 +283,8 @@ public sealed class SearchController(IIndexRepository repository,
 
         // use a custom StreamWriter that writes to the response body
         await using StreamWriter streamWriter = new(Response.Body, Encoding.UTF8);
-        await using CsvWriter csvWriter =
-            new(streamWriter, CultureInfo.InvariantCulture);
+        await using CsvWriter csvWriter = CsvWriter.Create(streamWriter,
+            new CsvWriterOptions { Separator = ',' }, leaveOpen: true);
 
         // write the CSV header
         WriteCsvHeader(model.ContextSize ?? 5, csvWriter);
